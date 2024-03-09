@@ -11,7 +11,7 @@ fi
 # Check if default.env is in the /script folder and make a new one if not:
 if ! test -f /dalybms/default.env; then
   echo "default.env is not in the /dalybms folder. Creating a new copy..."
-  cp /usr/src/app/bms-mqtt.py /dalybms/bms-mqtt.py
+  cp /usr/src/app/default.env /dalybms/default.env
   echo "Done."
 fi
 
