@@ -9,8 +9,8 @@ import time
 import os
 import paho.mqtt.client as mqtt
 
-  textVar = os.environ['DEVICE']
-  print(textVar)
+textVar = os.environ['DEVICE']
+print(textVar)
 
 
 print('Environment Variables')
