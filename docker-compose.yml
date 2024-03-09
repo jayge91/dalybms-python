@@ -4,7 +4,7 @@ services:
     container_name: dalybms-python
     image: jayge91/dalybms-python
     volumes:
-      - /home/jonathon/docker/dalybms:/dalybms
+      - /PATH/TO/CONFIG:/dalybms
     devices:
       - /dev/ttyS1:/dev/ttyS1
     privileged: true
