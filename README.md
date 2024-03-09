@@ -6,15 +6,3 @@ Feel free to modify anything here to fit your needs, or if you have an improveme
 Sources for information:
 https://github.com/jblance/mpp-solar/blob/master/docs/protocols/DALY-Daly_RS485_UART_Protocol.pdf
 https://diysolarforum.com/threads/decoding-the-daly-smartbms-protocol.21898/
-
-
-
-## Install
-[Will eventually be published to docker hub]
-Build from dockerfile and utilize .env file for script system variables
-
-Place only *ONE* script in the /script/ folder (map host path/volume to /script and add the file. It will automatically be run on container start.)
-Note: I don't know if this can handle multiple scripts?
-
-ENV entries:
-(placeholder)

@@ -9,23 +9,6 @@ import time
 import os
 import paho.mqtt.client as mqtt
 
-textVar = os.environ['DEVICE']
-print(textVar)
-
-
-print('Environment Variables')
-
-print(os.environ['MQTT_SERVER'])
-print(os.environ['MQTT_USER'])
-print(os.environ['MQTT_PASS'])
-print(os.environ['MQTT_CLIENT_ID'])
-print(os.environ['MQTT_DISCOVERY_PREFIX'])
-print(os.environ['DEVICE'])
-print(os.environ['DEVICE_ID'])
-print(os.environ['CELL_COUNT'])
-
-time.sleep(2)
-
 print('Starting BMS monitor...')
 
 
