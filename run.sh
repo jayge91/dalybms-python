@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "printenv:"
+printenv
+
 error=0
 # Check if bms-mqtt.py is in the /script folder and make a new one if not:
 #if ! test -f /dalybms/bms-mqtt.py; then

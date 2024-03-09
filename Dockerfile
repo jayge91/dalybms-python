@@ -14,5 +14,4 @@ RUN apt update && apt upgrade -y
 
 RUN mkdir /dalybms
 
-CMD /bin/bash -c 'printenv'
 CMD /bin/bash -c './run.sh'
