@@ -11,7 +11,7 @@ import paho.mqtt.client as mqtt
 
 
 
-print('Environment Variables:')
+print('Environment Variables')
 
 print(os.environ['MQTT_SERVER'])
 print(os.environ['MQTT_USER'])
