@@ -8,6 +8,6 @@ COPY bms-mqtt.py ./
 
 RUN chmod +x run.sh
 RUN pip install --no-cache-dir -r requirements.txt
-RUN mkdir /dalybms
+RUN mkdir /config
 
 CMD /bin/bash -c './run.sh'
