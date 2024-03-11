@@ -25,25 +25,83 @@ devId = os.environ['DEVICE_ID']
 BASE_TOPIC = os.environ['MQTT_DISCOVERY_PREFIX'] + '/sensor/'
 STATE_TOPIC = BASE_TOPIC + devId
 STATUS_TOPIC = STATE_TOPIC + '_status'
-deviceConf = '"device": {"manufacturer": "Dongfuan Daly Electronics", "name": "Smart BMS", "identifiers": ["' + devId + '"]}'
+
+
+deviceConf = '"device": {
+    "manufacturer": "Dongfuan Daly Electronics",
+    "name": "Smart BMS",
+    "identifiers": ["' + devId + '"]
+}'
+
 # publish MQTT Discovery configs to Home Assistant
-socHaConf = '{"device_class": "battery", "name": "Battery SOC", "state_topic": "' + STATE_TOPIC +'/state", "unit_of_measurement": "%", "value_template": "{{ value_json.soc}}", "unique_id": "' + devId + '_soc", ' + deviceConf + ', "json_attributes_topic": "' + STATUS_TOPIC + '/state"}' 
+socHaConf = '{
+    "device_class": "battery",
+    "name": "Battery SOC",
+    "state_topic": "' + STATE_TOPIC +'/state",
+    "unit_of_measurement": "%", "value_template": "{{ value_json.soc}}",
+    "unique_id": "' + devId + '_soc",
+    ' + deviceConf + ',
+    "json_attributes_topic": "' + STATUS_TOPIC + '/state"
+}'
 client.publish(STATE_TOPIC +'_soc/config', socHaConf, 0, True)
-voltageHaConf = '{"device_class": "voltage", "name": "Battery Voltage", "state_topic": "' + STATE_TOPIC +'/state", "unit_of_measurement": "V", "value_template": "{{ value_json.voltage}}", "unique_id": "' + devId + '_voltage", ' + deviceConf + '}'
+
+voltageHaConf = '{
+    "device_class": "voltage",
+    "name": "Battery Voltage",
+    "state_topic": "' + STATE_TOPIC +'/state",
+    "unit_of_measurement": "V",
+    "value_template": "{{ value_json.voltage}}",
+    "unique_id": "' + devId + '_voltage",
+    ' + deviceConf + '
+}'
 client.publish(STATE_TOPIC + '_voltage/config', voltageHaConf, 0, True)
-currentHaConf = '{"device_class": "current", "name": "Battery Current", "state_topic": "' + STATE_TOPIC +'/state", "unit_of_measurement": "A", "value_template": "{{ value_json.current}}", "unique_id": "' + devId + '_current", ' + deviceConf + '}' 
+
+currentHaConf = '{
+    "device_class": "current",
+    "name": "Battery Current",
+    "state_topic": "' + STATE_TOPIC +'/state",
+    "unit_of_measurement": "A",
+    "value_template": "{{ value_json.current}}",
+    "unique_id": "' + devId + '_current",
+    ' + deviceConf + '
+}' 
 client.publish(STATE_TOPIC + '_current/config', currentHaConf, 0, True)
 
 CELLS_TOPIC = STATE_TOPIC + '_balance'
-cellsHaConf = '{"device_class": "voltage", "name": "Battery Cell Balance", "state_topic": "' + CELLS_TOPIC + '/state", "unit_of_measurement": "V", "value_template": "{{ value_json.diff}}", "json_attributes_topic": "' + CELLS_TOPIC + '/state", "unique_id": "' + devId + '_balance", ' + deviceConf + '}' 
+cellsHaConf = '{
+    "device_class": "voltage",
+    "name": "Battery Cell Balance",
+    "state_topic": "' + CELLS_TOPIC + '/state",
+    "unit_of_measurement": "V",
+    "value_template": "{{ value_json.diff}}",
+    "json_attributes_topic": "' + CELLS_TOPIC + '/state",
+    "unique_id": "' + devId + '_balance",
+    ' + deviceConf + '
+}' 
 client.publish(CELLS_TOPIC + '/config', cellsHaConf, 0, True)
 
 TEMP_TOPIC = STATE_TOPIC + '_temp'
-tempHaConf = '{"device_class": "temperature", "name": "Battery Temperature", "state_topic": "' + TEMP_TOPIC + '/state", "unit_of_measurement": "°C", "value_template": "{{ value_json.value}}", "unique_id": "' + devId + '_temp", ' + deviceConf + ', "json_attributes_topic": "' + TEMP_TOPIC + '/state"}'
+tempHaConf = '{
+    "device_class": "temperature",
+    "name": "Battery Temperature",
+    "state_topic": "' + TEMP_TOPIC + '/state",
+    "unit_of_measurement": "°C",
+    "value_template": "{{ value_json.value}}",
+    "unique_id": "' + devId + '_temp",
+    ' + deviceConf + ',
+    "json_attributes_topic": "' + TEMP_TOPIC + '/state"
+}'
 client.publish(TEMP_TOPIC + '/config', tempHaConf, 0, True)
 
 MOS_TOPIC = STATE_TOPIC + '_mos'
-mosHaConf = '{"name": "MOS status", "state_topic": "' + MOS_TOPIC + '/state", "value_template": "{{ value_json.value}}", "unique_id": "' + devId + '_mos", ' + deviceConf + ', "json_attributes_topic": "' + MOS_TOPIC + '/state"}'
+mosHaConf = '{
+    "name": "MOS status",
+    "state_topic": "' + MOS_TOPIC + '/state",
+    "value_template": "{{ value_json.value
+    }", "unique_id": "' + devId + '_mos",
+    ' + deviceConf + ',
+    "json_attributes_topic": "' + MOS_TOPIC + '/state"
+}'
 client.publish(MOS_TOPIC + '/config', mosHaConf, 0, True)
 
 def cmd(command):
