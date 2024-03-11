@@ -7,6 +7,8 @@ if ! test -f /config/bms-mqtt.py; then
   echo "Done."
 fi
 
+# Run the python script that monitors the BMS:
 python /config/bms-mqtt.py
 
+# Report if the script is exited:  (Should never see this, as the script loops)
 echo "Script stopped!"
