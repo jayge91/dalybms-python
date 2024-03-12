@@ -27,7 +27,7 @@ STATE_TOPIC = BASE_TOPIC + devId
 STATUS_TOPIC = STATE_TOPIC + '_status'
 
 
-deviceConf = '"device": {
+deviceConf = '"device": '{
     "manufacturer": "Dongfuan Daly Electronics",
     "name": "Smart BMS",
     "identifiers": ["' + devId + '"]
