@@ -25,7 +25,7 @@
                         /state
                     # /Balance # (V)
                         # /config
-			/state
+			            /state
                     /Highest Cell # (V)
                         /config
                     /Lowest Cell # (V)
@@ -51,7 +51,10 @@
                     # /Ah Remaining # (Ah)
                         # /config
                         /state
-                /Power # (W)
+                /Power
+                    # /Watts # (W)
+                        # /config
+                        /state
                     /KWh Remaining # (KWh)
                         /config
                 /Temperature # (*C)
