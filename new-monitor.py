@@ -204,6 +204,7 @@ currentAhRemainingHaConf = construct_ha_conf(
 
 
 publish_mqtt_discovery_config(CURRENT_AMPS_TOPIC + '/config', json.dumps(currentAmpsHaconf))
+publish_mqtt_discovery_config(CURRENT_AH_REMAINING_TOPIC + '/config', json.dumps(currentAhRemainingHaconf))
 
 
 
