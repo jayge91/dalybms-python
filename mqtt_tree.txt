@@ -5,26 +5,27 @@
                 /Status
                     #/State(str: "idle", "charging", "discharging")
                         # /config
-                        # /state
+                        /state
                     # #/SOC # (%)
                         # /config
-                        # /state
-                    /Charge MOS # (on/off) (entity_category="diagnostic")
-                        /config
                         /state
-                    /Discharge MOS # (on/off) (entity_category="diagnostic")
-                        /config
+                    # /Charge MOS # (on/off) (entity_category="diagnostic")
+                        # /config
                         /state
-                    /Heartbeat # (int) (entity_category="diagnostic")
-                        /config
+                    # /Discharge MOS # (on/off) (entity_category="diagnostic")
+                        # /config
+                        /state
+                    # /Heartbeat # (int) (entity_category="diagnostic")
+                        # /config
                         /state
 
                 /Voltage
-                    /Pack # (V)
-                        /config
+                    # /Pack # (V)
+                        # /config
                         /state
-                    /Balance # (V)
-                        /config
+                    # /Balance # (V)
+                        # /config
+			/state
                     /Highest Cell # (V)
                         /config
                     /Lowest Cell # (V)
@@ -43,9 +44,13 @@
                         /config
                     /Cell 7 # (V) (entity_category="diagnostic")
                         /config
-                /Current # (A)
-                    /Ah Remaining # (Ah)
-                        /config
+                /Current # 
+		   	 		# /Amps (A)
+						# /config
+						/state
+                    # /Ah Remaining # (Ah)
+                        # /config
+                        /state
                 /Power # (W)
                     /KWh Remaining # (KWh)
                         /config
