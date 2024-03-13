@@ -31,7 +31,7 @@ deviceConf = '"device": '{
     "manufacturer": "Dongfuan Daly Electronics",
     "name": "Smart BMS",
     "identifiers": ["' + devId + '"]
-}'
+}
 
 # publish MQTT Discovery configs to Home Assistant
 socHaConf = '{
@@ -52,7 +52,7 @@ voltageHaConf = '{
     "unit_of_measurement": "V",
     "value_template": "{{ value_json.voltage}}",
     "unique_id": "' + devId + '_voltage",
-    ' + deviceConf + '
+    ' + deviceConf + ',
 }'
 client.publish(STATE_TOPIC + '_voltage/config', voltageHaConf, 0, True)
 
@@ -63,7 +63,7 @@ currentHaConf = '{
     "unit_of_measurement": "A",
     "value_template": "{{ value_json.current}}",
     "unique_id": "' + devId + '_current",
-    ' + deviceConf + '
+    ' + deviceConf + ',
 }' 
 client.publish(STATE_TOPIC + '_current/config', currentHaConf, 0, True)
 
@@ -76,7 +76,7 @@ cellsHaConf = '{
     "value_template": "{{ value_json.diff}}",
     "json_attributes_topic": "' + CELLS_TOPIC + '/state",
     "unique_id": "' + devId + '_balance",
-    ' + deviceConf + '
+    ' + deviceConf + ',
 }' 
 client.publish(CELLS_TOPIC + '/config', cellsHaConf, 0, True)
 
@@ -89,7 +89,7 @@ tempHaConf = '{
     "value_template": "{{ value_json.value}}",
     "unique_id": "' + devId + '_temp",
     ' + deviceConf + ',
-    "json_attributes_topic": "' + TEMP_TOPIC + '/state"
+    "json_attributes_topic": "' + TEMP_TOPIC + '/state",
 }'
 client.publish(TEMP_TOPIC + '/config', tempHaConf, 0, True)
 
@@ -100,7 +100,7 @@ mosHaConf = '{
     "value_template": "{{ value_json.value
     }", "unique_id": "' + devId + '_mos",
     ' + deviceConf + ',
-    "json_attributes_topic": "' + MOS_TOPIC + '/state"
+    "json_attributes_topic": "' + MOS_TOPIC + '/state",
 }'
 client.publish(MOS_TOPIC + '/config', mosHaConf, 0, True)
 
