@@ -10,4 +10,4 @@ RUN chmod +x run.sh \
 && pip install --no-cache-dir -r requirements.txt \
 && mkdir /config
 
-CMD /usr/src/app/run.sh
+CMD cat /usr/src/app/run.sh
