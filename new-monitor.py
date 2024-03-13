@@ -86,6 +86,7 @@ def construct_ha_conf(device_class, name, state_topic, value_template, unique_id
     
     
 ## Configuring JSON data for sensors:
+# Reference: https://developers.home-assistant.io/docs/core/entity/sensor/
 # Status:
 
 STATUS_STATE_TOPIC = MQTT_BASE_TOPIC + '/Status/State'
@@ -170,7 +171,7 @@ balanceVoltageHaConf = construct_ha_conf(
     state_topic=VOLTAGE_BALANCE_TOPIC + '/state',
     unit_of_measurement="V",
     value_template="{{ value }}",
-    unique_id=DEVICE_ID + '_balance',
+    unique_id=DEVICE_ID + '_voltage_balance',
     entity_category="diagnostic"
 )
 
@@ -187,41 +188,57 @@ currentAmpsHaConf = construct_ha_conf(
     state_topic =         CURRENT_AMPS_TOPIC + '/state',
     unit_of_measurement = "A",
     value_template =      "{{ value }}",
-    unique_id =           DEVICE_ID + '_current'
+    unique_id =           DEVICE_ID + '_current_amps',
+    entity_category =     None
 )
 
 CURRENT_AH_REMAINING_TOPIC = MQTT_BASE_TOPIC + '/Current/Ah Remaining'
 currentAhRemainingHaConf = construct_ha_conf(
     device_class =        "current",
-    name =                "Battery Current",
-    state_topic =         CURRENT_AMPS_TOPIC + '/state',
+    name =                "Battery Ah Remaining",
+    state_topic =         CURRENT_AH_REMAINING_TOPIC + '/state',
     unit_of_measurement = "A",
     value_template =      "{{ value }}",
-    unique_id =           DEVICE_ID + '_current'
+    unique_id =           DEVICE_ID + '_current_ah_remaining',
+    entity_category =     "diagnostic"
 )
-
-
-
 
 publish_mqtt_discovery_config(CURRENT_AMPS_TOPIC + '/config', json.dumps(currentAmpsHaconf))
 publish_mqtt_discovery_config(CURRENT_AH_REMAINING_TOPIC + '/config', json.dumps(currentAhRemainingHaconf))
 
 
-
-### Edited to here ###
-
-
-
-
-currentHaConf = construct_ha_conf(
-    device_class="current",
-    name="Battery Current",
-    state_topic=CURRENT_TOPIC + '/state',
-    unit_of_measurement="A",
-    value_template="{{ value }}",
-    unique_id=DEVICE_ID + '_current'
+# Power:
+POWER_WATTS_TOPIC = MQTT_BASE_TOPIC + '/Power/Watts'
+powerWattsHaConf = construct_ha_conf(
+    device_class =        "power",
+    name =                "Battery Watts",
+    state_topic =         POWER_WATTS_TOPIC + '/state',
+    unit_of_measurement = "W",
+    value_template =      "{{ value }}",
+    unique_id =           DEVICE_ID + '_power_watts',
+    entity_category =     None
 )
 
+POWER_KWH_REMAINING_TOPIC = MQTT_BASE_TOPIC + '/Power/KWh Remaining'
+powerKwhRemainingHaConf = construct_ha_conf(
+    device_class =        "energy_storage",
+    name =                "Battery KWh Remaining",
+    state_topic =         POWER_KWH_REMAINING_TOPIC + '/state',
+    unit_of_measurement = "kWh",
+    value_template =      "{{ value }}",
+    unique_id =           DEVICE_ID + '_power_kwh_remaining',
+    entity_category =     None
+)
+
+
+
+publish_mqtt_discovery_config(POWER_WATTS_TOPIC + '/config', json.dumps(powerWattsHaconf))
+publish_mqtt_discovery_config(POWER_KWH_REMAINING_TOPIC + '/config', json.dumps(powerKwhRemainingHaConf))
+
+
+######################
+### Edited to here ###
+######################
 
 
 tempHaConf = construct_ha_conf(
@@ -233,25 +250,6 @@ tempHaConf = construct_ha_conf(
     unique_id=DEVICE_ID + '_temp',
 )
 
-
-
-chargeMosControlHaConf = construct_ha_conf(
-    device_class=None,
-    name="Charge MOS Control",
-    state_topic=CONTROL_TOPIC + '/Charge MOS Control/state',
-    value_template="{{ value_json}}",
-    unique_id=DEVICE_ID + '_charge_mos_control',
-    entity_category="config"
-)
-
-dischargeMosControlHaConf = construct_ha_conf(
-    device_class=None,
-    name="Discharge MOS Control",
-    state_topic=CONTROL_TOPIC + '/Discharge MOS Control/state',
-    value_template="{{ value_json.value}}",
-    unique_id=DEVICE_ID + '_discharge_mos_control',
-    entity_category="config"
-)
 
 # Publishing MQTT Discovery configs to Home Assistant
 publish_mqtt_discovery_config(STATE_TOPIC + '_soc/config', str(socHaConf))
