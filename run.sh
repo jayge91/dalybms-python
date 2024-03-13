@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Check if bms-mqtt.py is in the /config folder and make a new one if not:
 if ! test -f /config/bms-mqtt.py; then
