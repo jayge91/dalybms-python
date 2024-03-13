@@ -2,12 +2,12 @@ FROM python:3
 
 WORKDIR /usr/src/app
 
-COPY requirements.txt /usr/src/app/
-COPY run.sh /usr/src/app/
-COPY bms-mqtt.py /usr/src/app/
+COPY requirements.txt ./
+COPY run.sh ./
+COPY bms-mqtt.py ./
 
 RUN chmod +x run.sh \
-&& pip install --no-cache-dir -r /usr/src/app/requirements.txt \
+&& pip install --no-cache-dir -r requirements.txt \
 && mkdir /config
 
-CMD /usr/src/app/run.sh
+CMD "/bin/bash", "-c", "--"
