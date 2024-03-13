@@ -90,7 +90,7 @@ def construct_ha_conf(device_class, name, state_topic, value_template, unique_id
 # Status:
 
 STATUS_STATE_TOPIC = MQTT_BASE_TOPIC + '/Status/State'
-stateHaConf = construct_ha_conf(
+statusStateHaConf = construct_ha_conf(
     device_class =        None,
     name =                "State",
     state_topic =         STATUS_STATE_TOPIC + '/state',
@@ -101,7 +101,7 @@ stateHaConf = construct_ha_conf(
 )
 
 STATUS_SOC_TOPIC = MQTT_BASE_TOPIC + '/Status/SOC'
-socHaConf = construct_ha_conf(
+statuSocHaConf = construct_ha_conf(
     device_class =        "battery",
     name =                "SOC",
     state_topic =         STATUS_SOC_TOPIC + '/state',
@@ -112,29 +112,29 @@ socHaConf = construct_ha_conf(
 )
 
 STATUS_CHARGE_MOS_TOPIC = MQTT_BASE_TOPIC + '/Status/Charge MOS'
-chargeMosHaConf = construct_ha_conf(
+statusChargeMosHaConf = construct_ha_conf(
     device_class =        None,
     name =                "Charge MOS status",
     state_topic =         STATUS_CHARGE_MOS_TOPIC + '/state',
     value_template =      "{{ value }}",
     unit_of_measurement = None,
-    unique_id =           DEVICE_ID + 'status_charge_mos',
+    unique_id =           DEVICE_ID + '_status_charge_mos',
     entity_category =     "diagnostic"
 )
 
 STATUS_DISCHARGE_MOS_TOPIC = MQTT_BASE_TOPIC + '/Status/Discharge MOS'
-chargeMosHaConf = construct_ha_conf(
+statusChargeMosHaConf = construct_ha_conf(
     device_class =        None,
     name =                "Disharge MOS status",
     state_topic =         STATUS_DISCHARGE_MOS_TOPIC + '/state',
     value_template =      "{{ value }}",
     unit_of_measurement = None,
-    unique_id =           DEVICE_ID + 'status_discharge_mos',
+    unique_id =           DEVICE_ID + '_status_discharge_mos',
     entity_category =     "diagnostic"
 )
 
 STATUS_HEARTBEAT_TOPIC = MQTT_BASE_TOPIC + '/Status/Heartbeat'
-heartbeatHaConf = construct_ha_conf(
+statusHeartbeatHaConf = construct_ha_conf(
     device_class =        None,
     name =                "Heartbeat",
     state_topic =         STATUS_HEARTBEAT_TOPIC + '/state',
@@ -144,28 +144,28 @@ heartbeatHaConf = construct_ha_conf(
     entity_category =     "diagnostic"
 )
 
-publish_mqtt_discovery_config(STATUS_STATE_TOPIC + '/config', json.dumps(stateHaConf))
-publish_mqtt_discovery_config(STATUS_SOC_TOPIC + '/config', json.dumps(socHaConf))
-publish_mqtt_discovery_config(STATUS_CHARGE_MOS_TOPIC + '/config', json.dumps(chargeMosHaConf))
-publish_mqtt_discovery_config(STATUS_DISCHARGE_MOS_TOPIC + '/config', json.dumps(dischargeMosHaConf))
-publish_mqtt_discovery_config(STATUS_HEARTBEAT_TOPIC + '/config', json.dumps(heartbeatMosHaConf))
+publish_mqtt_discovery_config(STATUS_STATE_TOPIC + '/config', json.dumps(statusStateHaConf))
+publish_mqtt_discovery_config(STATUS_SOC_TOPIC + '/config', json.dumps(statusSocHaConf))
+publish_mqtt_discovery_config(STATUS_CHARGE_MOS_TOPIC + '/config', json.dumps(statusChargeMosHaConf))
+publish_mqtt_discovery_config(STATUS_DISCHARGE_MOS_TOPIC + '/config', json.dumps(statusDischargeMosHaConf))
+publish_mqtt_discovery_config(STATUS_HEARTBEAT_TOPIC + '/config', json.dumps(statusHeartbeatMosHaConf))
 
 
 # Voltage:
 
-VOLTAGE_PACK_TOPIC = MQTT_BASE_TOPIC + '/Status/Heartbeat'
-packVoltageHaConf = construct_ha_conf(
+VOLTAGE_PACK_TOPIC = MQTT_BASE_TOPIC + '/Voltage/Pack'
+voltagePackHaConf = construct_ha_conf(
     device_class =        "voltage",
     name =                "Battery Pack Voltage",
     state_topic =         VOLTAGE_PACK_TOPIC + '/state',
     unit_of_measurement = "V",
     value_template =      "{{ value }}",
-    unique_id =           DEVICE_ID + 'voltage_pack',
+    unique_id =           DEVICE_ID + '_voltage_pack',
     entity_category =     None,
 )
 
 VOLTAGE_BALANCE_TOPIC = MQTT_BASE_TOPIC + '/Voltage/Balance'
-balanceVoltageHaConf = construct_ha_conf(
+voltageBalanceHaConf = construct_ha_conf(
     device_class="voltage",
     name="Balance",
     state_topic=VOLTAGE_BALANCE_TOPIC + '/state',
@@ -175,8 +175,8 @@ balanceVoltageHaConf = construct_ha_conf(
     entity_category="diagnostic"
 )
 
-publish_mqtt_discovery_config(VOLTAGE_PACK_TOPIC + '/config', json.dumps(packVoltageHaConf))
-publish_mqtt_discovery_config(VOLTAGE_BALANCE_TOPIC + '/config', json.dumps(balanceVoltageHaconf))
+publish_mqtt_discovery_config(VOLTAGE_PACK_TOPIC + '/config', json.dumps(voltagePackHaConf))
+publish_mqtt_discovery_config(VOLTAGE_BALANCE_TOPIC + '/config', json.dumps(voltageBalanceHaconf))
 
 
 # Current:
@@ -230,31 +230,25 @@ powerKwhRemainingHaConf = construct_ha_conf(
     entity_category =     None
 )
 
-
-
 publish_mqtt_discovery_config(POWER_WATTS_TOPIC + '/config', json.dumps(powerWattsHaconf))
 publish_mqtt_discovery_config(POWER_KWH_REMAINING_TOPIC + '/config', json.dumps(powerKwhRemainingHaConf))
 
 
-######################
-### Edited to here ###
-######################
+# Temperature:
 
-
-tempHaConf = construct_ha_conf(
-    device_class="temperature",
-    name="Battery Temperature",
-    state_topic=TEMPERATURE_TOPIC + '/state',
-    unit_of_measurement="°C",
-    value_template="{{ value }}",
-    unique_id=DEVICE_ID + '_temp',
+TEMPERATURE_BATTERY_TOPIC = MQTT_BASE_TOPIC + '/Temperature/Battery'
+temperatureBatteryHaConf = construct_ha_conf(
+    device_class =        "temperature",
+    name =                "Battery Temperature",
+    state_topic =         TEMPERATURE_BATTERY_TOPIC + '/state',
+    unit_of_measurement = "°C",
+    value_template =      "{{ value }}",
+    unique_id =           DEVICE_ID + '_temperature_battery',
+    entity_category =     None
 )
 
+publish_mqtt_discovery_config(TEMPERATURE_BATTERY_TOPIC + '/config', json.dumps(temperatureBatteryHaConf))
 
-# Publishing MQTT Discovery configs to Home Assistant
-publish_mqtt_discovery_config(STATE_TOPIC + '_soc/config', str(socHaConf))
-publish_mqtt_discovery_config(STATE_TOPIC + '_current/config', str(currentHaConf))
-publish_mqtt_discovery_config(TEMPERATURE_TOPIC + '/config', str(tempHaConf))
-publish_mqtt_discovery_config(DIAGNOSTIC_TOPIC + '/config', str(mosHaConf))
-publish_mqtt_discovery_config(CONTROL_TOPIC + '/charge_mos_control/config', str(chargeMosControlHaConf))
-publish_mqtt_discovery_config(CONTROL_TOPIC + '/discharge_mos_control/config', str(dischargeMosControlHaConf))
+
+
+
