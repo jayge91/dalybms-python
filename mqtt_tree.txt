@@ -55,10 +55,11 @@
                     # /Watts # (W)
                         # /config
                         /state
-                    /KWh Remaining # (KWh)
-                        /config
+                    # /KWh Remaining # (KWh)
+                        # /config
                 /Temperature # (*C)
-                    /config
+		            /Battery Temperature
+	              	    /config
                 # /Control
                     # /Charge MOS Control # (on/off) (entity_category="config")
                         # /config
