@@ -1,41 +1,16 @@
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# Python Script by Jayge91 for monitoring and controlling Daly SMART BMS Devices.
-# This script is designed to publish information and control topics over MQTT for Home Assistant.
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Python Script by Jayge91 for monitoring and controlling Daly SMART BMS Devices.                   #
+# This script is designed to publish information and control topics over MQTT for Home Assistant.   #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# MQTT Topic Tree:
-	# /MQTT_DISCOVERY_PREFIX
-		# /sensor
-			# /DEVICE_ID
-				# /Status (str: idle, charging, discharging)
-					# /Charge MOS # (on/off) (entity_category="diagnostic")
-					# /Discharge MOS # (on/off) (entity_category="diagnostic")
-					# /Heartbeat # (int) (entity_category="diagnostic")
-				# /SOC # (%)
-				# /Voltage # (V)
-					# /Balance # (V)
-					# /Highest Cell # (V)
-					# /Lowest Cell # (V)
-					# /Cell 1 # (V) (entity_category="diagnostic")
-					# /Cell 2 # (V) (entity_category="diagnostic")
-					# /Cell 3 # (V) (entity_category="diagnostic")
-					# /Cell 4 # (V) (entity_category="diagnostic")
-					# /Cell 5 # (V) (entity_category="diagnostic")
-					# /Cell 6 # (V) (entity_category="diagnostic")
-					# /Cell 7 # (V) (entity_category="diagnostic")
-				# /Current # (A)
-					# /Ah Remaining # (Ah)
-				# /Power # (W)
-					# /KWh Remaining # (KWh)
-				# /Temperature # (*C)
-				# /Control
-					# /Charge MOS Control # (on/off) (entity_category="config")
-					# /Discharge MOS Control # (on/off) (entity_category="config")
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # Initial Setup:                                                            #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+print("Importing Modules...")
 
+import json
 import serial
 import binascii
 import time
@@ -44,13 +19,32 @@ import paho.mqtt.client as mqtt
 
 
 # Environment Variables:
-MQTT_SERVER = os.environ['MQTT_SERVER'] # ip
-MQTT_USER = os.environ['MQTT_USER']
-MQTT_PASS = os.environ['MQTT_PASS']
-MQTT_CLIENT_ID = os.environ['MQTT_CLIENT_ID']
+print("Importing Environment Variables...")
 
-MQTT_DISCOVERY_PREFIX = os.environ['MQTT_DISCOVERY_PREFIX']
-DEVICE_ID = os.environ['DEVICE_ID'] # tty device
+# Function to check if environment variables are set
+def check_environment_variable(var_name):
+    if var_name not in os.environ or not os.environ[var_name]:
+        print(f"Error: Environment variable {var_name} is not set or is empty.")
+        exit(1)
+
+# Check environment variables
+check_environment_variable('DEVICE')
+check_environment_variable('MQTT_SERVER')
+check_environment_variable('MQTT_USER')
+check_environment_variable('MQTT_PASS')
+check_environment_variable('MQTT_CLIENT_ID')
+check_environment_variable('MQTT_DISCOVERY_PREFIX')
+check_environment_variable('DEVICE_ID')
+check_environment_variable('CELL_COUNT')
+
+
+DEVICE = os.environ['DEVICE'] # /dev/ttyS1
+MQTT_SERVER = os.environ['MQTT_SERVER'] # core-mosquitto
+MQTT_USER = os.environ['MQTT_USER'] # mqtt
+MQTT_PASS = os.environ['MQTT_PASS'] # mqtt
+MQTT_CLIENT_ID = os.environ['MQTT_CLIENT_ID'] # dalybms
+MQTT_DISCOVERY_PREFIX = os.environ['MQTT_DISCOVERY_PREFIX'] # homeassistant
+DEVICE_ID = os.environ['DEVICE_ID'] # Daly-Smart-BMS
 CELL_COUNT = int(os.environ['CELL_COUNT']) # later won't be needed
 
 
@@ -60,43 +54,27 @@ client.username_pw_set(os.environ['MQTT_USER'], os.environ['MQTT_PASS'])
 client.connect(os.environ['MQTT_SERVER'])
 
 
-# Define MQTT base topics
-BASE_TOPIC = MQTT_DISCOVERY_PREFIX + '/sensor/'
-DEVICE_NAME = DEVICE_ID
-STATE_TOPIC = BASE_TOPIC + DEVICE_NAME
-STATUS_TOPIC = STATE_TOPIC + '/Status'
-VOLTAGE_TOPIC = STATE_TOPIC + '/Voltage'
-CELLS_TOPIC = VOLTAGE_TOPIC + '/Cells'
-BALANCE_TOPIC = VOLTAGE_TOPIC + '/Balance'
-CURRENT_TOPIC = STATE_TOPIC + '/Current'
-POWER_TOPIC = STATE_TOPIC + '/Power'
-TEMPERATURE_TOPIC = STATE_TOPIC + '/Temperature'
-DIAGNOSTIC_TOPIC = STATE_TOPIC + '/Diagnostic'
-CONTROL_TOPIC = STATE_TOPIC + '/Control'
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # Home Assistant Device Discovery:                                          #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+MQTT_BASE_TOPIC = MQTT_DISCOVERY_PREFIX + '/sensor/' + DEVICE_ID # "homeassistant/sensor/Daly-Smart-BMS"
 
 # Function to publish MQTT Discovery configurations to Home Assistant:
 def publish_mqtt_discovery_config(topic, config):
     client.publish(topic, config, 0, True)
 
 # Constructing JSON output strings for different sensors discovery:
-def construct_ha_conf(device_class, name, state_topic, unit_of_measurement=None, value_template=None, unique_id=None, json_attributes_topic=None, entity_category=None):
+def construct_ha_conf(device_class, name, state_topic, value_template, unique_id, unit_of_measurement=None, entity_category=None):
     ha_conf = {
         "device_class": device_class,
         "name": name,
-        "state_topic": state_topic,
+        "state_topic": state_topic + '/state',
+        "unique_id": unique_id,
+        "value_template": value,
     }
     if unit_of_measurement:
         ha_conf["unit_of_measurement"] = unit_of_measurement
-    if value_template:
-        ha_conf["value_template"] = value_template
-    if unique_id:
-        ha_conf["unique_id"] = unique_id
-    if json_attributes_topic:
-        ha_conf["json_attributes_topic"] = json_attributes_topic
     if entity_category:
         ha_conf["entity_category"] = entity_category
     ha_conf["device"] = {
@@ -108,42 +86,63 @@ def construct_ha_conf(device_class, name, state_topic, unit_of_measurement=None,
     
     
 # Configuring JSON data for different sensors:
-socHaConf = construct_ha_conf(
-    device_class="battery",
-    name="Battery SOC",
-    state_topic=STATE_TOPIC + '/state',
-    unit_of_measurement="%",
-    value_template="{{ value_json.soc}}",
-    unique_id=DEVICE_ID + '_soc',
-    json_attributes_topic=STATUS_TOPIC + '/state'
+
+STATUS_STATE_TOPIC              = MQTT_BASE_TOPIC + '/Status/State'
+stateHaConf = construct_ha_conf(
+    device_class                = None,
+    name                        = "State",
+    state_topic                 = STATUS_STATE_TOPIC + '/state',
+    unit_of_measurement         = None,
+    value_template              = "{{ value }}", # Static
+    unique_id                   = DEVICE_ID + '_status_state',
+    entity_category             = None,
 )
+
+
+
+STATUS_SOC_TOPIC                = MQTT_BASE_TOPIC + '/Status/SOC'
+socHaConf = construct_ha_conf(
+    device_class                = "battery",
+    name                        = "SOC",
+    state_topic                 = STATUS_SOC_TOPIC + '/state',
+    unit_of_measurement         = "%",
+    value_template              = "{{ value }}", # Static
+    unique_id                   = DEVICE_ID + '_sensor_soc',
+)
+
+
+publish_mqtt_discovery_config(STATUS_STATE_TOPIC + '/config', json.dumps(stateHaConf))
+publish_mqtt_discovery_config(STATUS_SOC_TOPIC + '/config', json.dumps(socHaConf))
+
+### Edited to here ###
+
+
 
 voltageHaConf = construct_ha_conf(
     device_class="voltage",
     name="Battery Voltage",
-    state_topic=STATE_TOPIC + '/state',
+    state_topic=MQTT_DISCOVERY_PREFIX + '/sensor/Voltage/Pack',
     unit_of_measurement="V",
-    value_template="{{ value_json.voltage}}",
+    value_template="{{ value }}",
     unique_id=DEVICE_ID + '_voltage'
 )
 
 currentHaConf = construct_ha_conf(
     device_class="current",
     name="Battery Current",
-    state_topic=STATE_TOPIC + '/state',
+    state_topic=CURRENT_TOPIC + '/state',
     unit_of_measurement="A",
-    value_template="{{ value_json.current}}",
+    value_template="{{ value }}",
     unique_id=DEVICE_ID + '_current'
 )
 
-cellsHaConf = construct_ha_conf(
+cell1vHaConf = construct_ha_conf(
     device_class="voltage",
-    name="Battery Cell Balance",
+    name="Cell Balance",
     state_topic=CELLS_TOPIC + '/state',
     unit_of_measurement="V",
-    value_template="{{ value_json.diff}}",
+    value_template="{{ value }}",
     unique_id=DEVICE_ID + '_balance',
-    json_attributes_topic=CELLS_TOPIC + '/state',
     entity_category="diagnostic"
 )
 
@@ -152,18 +151,16 @@ tempHaConf = construct_ha_conf(
     name="Battery Temperature",
     state_topic=TEMPERATURE_TOPIC + '/state',
     unit_of_measurement="°C",
-    value_template="{{ value_json.value}}",
+    value_template="{{ value }}",
     unique_id=DEVICE_ID + '_temp',
-    json_attributes_topic=TEMPERATURE_TOPIC + '/state'
 )
 
 mosHaConf = construct_ha_conf(
     device_class=None,
     name="MOS status",
     state_topic=DIAGNOSTIC_TOPIC + '/state',
-    value_template="{{ value_json.value}}",
+    value_template="{{ value }}",
     unique_id=DEVICE_ID + '_mos',
-    json_attributes_topic=DIAGNOSTIC_TOPIC + '/state',
     entity_category="diagnostic"
 )
 
@@ -171,7 +168,7 @@ chargeMosControlHaConf = construct_ha_conf(
     device_class=None,
     name="Charge MOS Control",
     state_topic=CONTROL_TOPIC + '/Charge MOS Control/state',
-    value_template="{{ value_json.value}}",
+    value_template="{{ value_json}}",
     unique_id=DEVICE_ID + '_charge_mos_control',
     entity_category="config"
 )
@@ -189,7 +186,6 @@ dischargeMosControlHaConf = construct_ha_conf(
 publish_mqtt_discovery_config(STATE_TOPIC + '_soc/config', str(socHaConf))
 publish_mqtt_discovery_config(STATE_TOPIC + '_voltage/config', str(voltageHaConf))
 publish_mqtt_discovery_config(STATE_TOPIC + '_current/config', str(currentHaConf))
-publish_mqtt_discovery_config(CELLS_TOPIC + '/config', str(cellsHaConf))
 publish_mqtt_discovery_config(TEMPERATURE_TOPIC + '/config', str(tempHaConf))
 publish_mqtt_discovery_config(DIAGNOSTIC_TOPIC + '/config', str(mosHaConf))
 publish_mqtt_discovery_config(CONTROL_TOPIC + '/charge_mos_control/config', str(chargeMosControlHaConf))
