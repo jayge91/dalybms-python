@@ -10,4 +10,4 @@ RUN chmod +x run.sh \
 && pip install --no-cache-dir -r requirements.txt \
 && mkdir /config
 
-CMD "/bin/sh", "-c", "--"
+CMD [ "/bin/bash", "-c", "--" ]
