@@ -46,7 +46,7 @@ MQTT_PASS = os.environ['MQTT_PASS'] # mqtt
 MQTT_CLIENT_ID = os.environ['MQTT_CLIENT_ID'] # dalybms
 MQTT_DISCOVERY_PREFIX = os.environ['MQTT_DISCOVERY_PREFIX'] # homeassistant
 DEVICE_ID = os.environ['DEVICE_ID'] # Daly-Smart-BMS
-CELL_COUNT = int(os.environ['CELL_COUNT']) # later won't be needed
+# CELL_COUNT = int(os.environ['CELL_COUNT']) # later won't be needed
 
 
 ## Connect to MQTT:
@@ -102,6 +102,7 @@ def construct_ha_conf(device_class, name, state_topic, unit_of_measurement, valu
     
 # Status: 
 
+statusState = None
 STATUS_STATE_TOPIC =      MQTT_BASE_TOPIC + '/Status/State'
 statusStateHaConf =       construct_ha_conf(
     device_class =        None,
@@ -113,6 +114,7 @@ statusStateHaConf =       construct_ha_conf(
     entity_category =     None,
 )
 
+statusSoc = None
 STATUS_SOC_TOPIC =        MQTT_BASE_TOPIC + '/Status/SOC'
 statuSocHaConf =          construct_ha_conf(
     device_class =        "battery",
@@ -124,6 +126,7 @@ statuSocHaConf =          construct_ha_conf(
     entity_category =     None,
 )
 
+statusChargeMos = None
 STATUS_CHARGE_MOS_TOPIC = MQTT_BASE_TOPIC + '/Status/Charge MOS'
 statusChargeMosHaConf =   construct_ha_conf(
     device_class =        None,
@@ -135,6 +138,7 @@ statusChargeMosHaConf =   construct_ha_conf(
     entity_category =     "diagnostic"
 )
 
+statusChargeMos = None
 STATUS_DISCHARGE_MOS_TOPIC = MQTT_BASE_TOPIC + '/Status/Discharge MOS'
 statusChargeMosHaConf =   construct_ha_conf(
     device_class =        None,
@@ -146,6 +150,20 @@ statusChargeMosHaConf =   construct_ha_conf(
     entity_category =     "diagnostic"
 )
 
+statusCellCount = None
+STATUS_CELL_COUNT_TOPIC = MQTT_BASE_TOPIC + '/Status/Cell Count'
+statusCellCountHaConf =   construct_ha_conf(
+    device_class =        None,
+    name =                "Disharge MOS status",
+    state_topic =         STATUS_DISCHARGE_MOS_TOPIC + '/state',
+    value_template =      "{{ value }}",
+    unit_of_measurement = None,
+    unique_id =           DEVICE_ID + '_status_discharge_mos',
+    entity_category =     "diagnostic"
+
+
+
+statusHeartbeat = None
 STATUS_HEARTBEAT_TOPIC =  MQTT_BASE_TOPIC + '/Status/Heartbeat'
 statusHeartbeatHaConf =   construct_ha_conf(
     device_class =        None,
@@ -161,11 +179,13 @@ publish_mqtt_discovery_config(STATUS_STATE_TOPIC + '/config', json.dumps(statusS
 publish_mqtt_discovery_config(STATUS_SOC_TOPIC + '/config', json.dumps(statusSocHaConf))
 publish_mqtt_discovery_config(STATUS_CHARGE_MOS_TOPIC + '/config', json.dumps(statusChargeMosHaConf))
 publish_mqtt_discovery_config(STATUS_DISCHARGE_MOS_TOPIC + '/config', json.dumps(statusDischargeMosHaConf))
+publish_mqtt_discovery_config(STATUS_CELL_COUNT_TOPIC + '/config', json.dumps(statusCellCountHaConf))
 publish_mqtt_discovery_config(STATUS_HEARTBEAT_TOPIC + '/config', json.dumps(statusHeartbeatMosHaConf))
 
 
 # Voltage:
 
+voltagePack = None
 VOLTAGE_PACK_TOPIC =      MQTT_BASE_TOPIC + '/Voltage/Pack'
 voltagePackHaConf =       construct_ha_conf(
     device_class =        "voltage",
@@ -177,6 +197,7 @@ voltagePackHaConf =       construct_ha_conf(
     entity_category =     None,
 )
 
+voltageBalance = None
 VOLTAGE_BALANCE_TOPIC =   MQTT_BASE_TOPIC + '/Voltage/Balance'
 voltageBalanceHaConf =    construct_ha_conf(
     device_class =        "voltage",
@@ -194,6 +215,7 @@ publish_mqtt_discovery_config(VOLTAGE_BALANCE_TOPIC + '/config', json.dumps(volt
 
 # Current:
 
+currentAmps = None
 CURRENT_AMPS_TOPIC =      MQTT_BASE_TOPIC + '/Current/Amps'
 currentAmpsHaConf =       construct_ha_conf(
     device_class =        "current",
@@ -205,6 +227,7 @@ currentAmpsHaConf =       construct_ha_conf(
     entity_category =     None
 )
 
+currentAh = None
 CURRENT_AH_REMAINING_TOPIC = MQTT_BASE_TOPIC + '/Current/Ah Remaining'
 currentAhRemainingHaConf = construct_ha_conf(
     device_class =        "current",
@@ -222,6 +245,7 @@ publish_mqtt_discovery_config(CURRENT_AH_REMAINING_TOPIC + '/config', json.dumps
 
 # Power:
 
+powerWatts = None
 POWER_WATTS_TOPIC =       MQTT_BASE_TOPIC + '/Power/Watts'
 powerWattsHaConf =        construct_ha_conf(
     device_class =        "power",
@@ -233,6 +257,7 @@ powerWattsHaConf =        construct_ha_conf(
     entity_category =     None
 )
 
+powerKwh = None
 POWER_KWH_REMAINING_TOPIC = MQTT_BASE_TOPIC + '/Power/KWh Remaining'
 powerKwhRemainingHaConf = construct_ha_conf(
     device_class =        "energy_storage",
@@ -250,6 +275,7 @@ publish_mqtt_discovery_config(POWER_KWH_REMAINING_TOPIC + '/config', json.dumps(
 
 # Temperature:
 
+temperatureBattery = None
 TEMPERATURE_BATTERY_TOPIC = MQTT_BASE_TOPIC + '/Temperature/Battery'
 temperatureBatteryHaConf = construct_ha_conf(
     device_class =        "temperature",
@@ -266,8 +292,9 @@ publish_mqtt_discovery_config(TEMPERATURE_BATTERY_TOPIC + '/config', json.dumps(
 
 # Switches:
 
+controlChargeMos = None
 CONTROL_CHARGE_MOS_TOPIC = MQTT_SWITCH_TOPIC + '/Control/Charge MOS'
-controlChargeMosControlHaConf = construct_ha_conf(
+controlChargeMosHaConf = construct_ha_conf(
     device_class =        "switch",
     name =                "Charge MOS",
     state_topic =         CONTROL_CHARGE_MOS_TOPIC + '/state',
@@ -277,6 +304,7 @@ controlChargeMosControlHaConf = construct_ha_conf(
     entity_category =     "config"
 )
 
+controlDischargeMos = None
 CONTROL_DISCHARGE_MOS_TOPIC = MQTT_SWITCH_TOPIC + '/Control/Discharge MOS'
 controlDischargeMosHaConf = construct_ha_conf(
     device_class =        "switch",
@@ -288,11 +316,172 @@ controlDischargeMosHaConf = construct_ha_conf(
     entity_category =     "config"
 )
 
-publish_mqtt_discovery_config(CONTROL_CHARGE_MOS_TOPIC + '/config', json.dumps(controlChargeMosControlHaConf))
+publish_mqtt_discovery_config(CONTROL_CHARGE_MOS_TOPIC + '/config', json.dumps(controlChargeMosHaConf))
 publish_mqtt_discovery_config(CONTROL_DISCHARGE_MOS_TOPIC + '/config', json.dumps(controlDischargeMosHaConf))
+
+
+
+# Variables that are not yet used:
+gatherTotalVoltage = None #0x90 - byte 2-3 - Gather total voltage (0.1 V)
 
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # Binary Data Handling and Convertion:                                      #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+
+
+def cmd(command):
+    res = []
+    ser.write(command)
+    while True:
+        s = ser.read(13)
+        if (s == b''):
+            break
+        # print(binascii.hexlify(s, ' '))
+        res.append(s)
+    return res
+
+
+def publish(topic, data):
+    try:
+        client.publish(topic, data, 0, False)
+    except Exception as e:
+        print("Error sending to mqtt: " + str(e))
+
+
+# Function to break down a byte into individual bits:
+def get_bit_status(byte):
+    bit_status = []
+    for i in range(8):  # 8 bits in a byte
+        bit_value = (byte >> i) & 0x01
+        bit_status.append(bit_value)
+    return bit_status
+
+# Example usage:
+# byte_value = 170  # Example byte value
+# bit_status = get_bit_status(byte_value)
+# print(bit_status)  # Output: [0, 1, 0, 1, 0, 1, 0, 1]
+
+
+def extract_cells_v(buffer):
+    return [
+        int.from_bytes(buffer[5:7], byteorder='big', signed=False),
+        int.from_bytes(buffer[7:9], byteorder='big', signed=False),
+        int.from_bytes(buffer[9:11], byteorder='big', signed=False)
+    ]
+
+
+
+
+
+##################################################################
+def get_cell_balance(statusCellCount):
+    res = cmd(b'\xa5\x40\x95\x08\x00\x00\x00\x00\x00\x00\x00\x00\x82')
+    if len(res) < 1:
+        print('Empty response get_cell_balance')
+        return
+    cells = []
+    for frame in res:
+        cells += extract_cells_v(frame)
+    cells = cells[:statusCellCount]
+
+    sum = 0
+    for i in range(statusCellCount):
+        cells[i] = cells[i]/1000
+        sum += cells[i]
+
+    ##NEED COMPLETE
+    voltageCell1
+    voltageCell2
+    voltageCell3
+    voltageCell4
+    voltageCell5
+    voltageCell6
+    voltageCell7
+
+def get_battery_state():
+    res = cmd(b'\xa5\x40\x90\x08\x00\x00\x00\x00\x00\x00\x00\x00\x7d')
+    if len(res) < 1:
+        print('Empty response get_battery_state')
+        return
+    buffer = res[0]
+    
+    voltagePack = int.from_bytes(buffer[4:6], byteorder='big', signed=False) / 10
+    gatherTotalVoltage = int.from_bytes(buffer[6:8], byteorder='big', signed=False) / 10
+    currentAmps = int.from_bytes(buffer[8:10], byteorder='big', signed=False) / 10 - 3000
+    statusSoc = int.from_bytes(buffer[10:12], byteorder='big', signed=False) / 10
+
+    if currentAmps = -3000:
+        currentAmps = 0
+
+
+def get_battery_status():
+    res = cmd(b'\xa5\x40\x94\x08\x00\x00\x00\x00\x00\x00\x00\x00\x81')
+    if len(res) < 1:
+        print('Empty response get_battery_status')
+        return
+    buffer = res[0]
+    
+    statusCellCount = int.from_bytes(buffer[4:5], byteorder='big', signed=False)
+    # this temperature seems to always be 1
+    temp = int.from_bytes(buffer[5:6], byteorder='big', signed=False)
+    charger = 'true' if int.from_bytes(buffer[6:7], byteorder='big', signed=False) == 1 else 'false'
+    load = 'true' if int.from_bytes(buffer[7:8], byteorder='big', signed=False) == 1 else 'false'
+    # dido = buffer[8:9]
+    cycles = int.from_bytes(buffer[9:11], byteorder='big', signed=False)
+
+
+def get_battery_temp():
+    res = cmd(b'\xa5\x40\x92\x08\x00\x00\x00\x00\x00\x00\x00\x00\x7f')
+    if len(res) < 1:
+        print('Empty response get_battery_temp')
+        return
+    buffer = res[0]
+    maxTemp = int.from_bytes(buffer[4:5], byteorder='big', signed=False) - 40
+    maxTempCell = int.from_bytes(buffer[5:6], byteorder='big', signed=False)
+    minTemp = int.from_bytes(buffer[6:7], byteorder='big', signed=False) - 40
+    minTempCell = int.from_bytes(buffer[7:8], byteorder='big', signed=False)
+
+    json = '{'
+    json += '"value":' + str((maxTemp + minTemp) / 2) + ','
+    json += '"maxTemp":' + str(maxTemp) + ','
+    json += '"maxTempCell":' + str(maxTempCell) + ','
+    json += '"minTemp":' + str(minTemp) + ','
+    json += '"minTempCell":' + str(minTempCell)
+    json += '}'
+    # print(json)
+    publish(TEMP_TOPIC +'/state', json)
+
+def get_battery_mos_status():
+    res = cmd(b'\xa5\x40\x93\x08\x00\x00\x00\x00\x00\x00\x00\x00\x80')
+    if len(res) < 1:
+        print('Empty response get_battery_mos_status')
+        return
+    buffer = res[0]
+    valueByte = int.from_bytes(buffer[4:5], byteorder='big', signed=False)
+    value = 'discharging' if valueByte == 2 else ('charging' if valueByte == 1 else 'idle')
+    chargeMOS = int.from_bytes(buffer[5:6], byteorder='big', signed=False)
+    dischargeMOS = int.from_bytes(buffer[6:7], byteorder='big', signed=False)
+    BMSLife = int.from_bytes(buffer[7:8], byteorder='big', signed=False)
+    residualCapacity = int.from_bytes(buffer[8:12], byteorder='big', signed=False)
+
+    # print(json)
+    publish(MOS_TOPIC +'/state', json)
+
+
+
+
+
+while True:
+    get_bms_status_info()
+    get_battery_state()
+    get_cell_balance(statusCellCount)
+    get_battery_status()
+    get_battery_temp()
+    get_battery_mos_status()
+    time.sleep(1)
+    
+ser.close()
+print('done')
