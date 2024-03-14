@@ -3,22 +3,19 @@ services:
   dalybms-python:
     container_name: dalybms-python
     image: jayge91/dalybms-python
-    volumes:
-      - /PATH/TO/CONFIG:/dalybms
     devices:
       - /dev/ttyS1:/dev/ttyS1
     cap_add:
       SYS_TTY_CONFIG
     # privileged: true
     environment:
+      DEVICE: /dev/ttyS1
       MQTT_SERVER: core-mosquitto
       MQTT_USER: mqtt
       MQTT_PASS: mqtt
       MQTT_CLIENT_ID: dalybms
       MQTT_DISCOVERY_PREFIX: homeassistant
-      DEVICE: /dev/ttyS1
       DEVICE_ID: Daly-Smart-BMS
-      CELL_COUNT: 7
     restart: on-failure:3
     network_mode: host
       
