@@ -1,4 +1,4 @@
-name: ci
+name: Push to Docker Hub (amd64/arm64)
 
 on:
   # schedule:
@@ -8,9 +8,9 @@ on:
       - "main"
     tags:
       - "v*"
-  pull_request:
-    branches:
-      - "main"
+  #pull_request:
+  #  branches:
+  #    - "main"
 
 jobs:
   docker:
