@@ -5,9 +5,9 @@ on:
   #  - cron: "0 10 * * *"
   push:
     branches:
-      - "**"
+      - "main"
     tags:
-      - "v*.*.*"
+      - "v*"
   pull_request:
     branches:
       - "main"
@@ -28,13 +28,10 @@ jobs:
             ghcr.io/jayge91/dalybms-python
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=schedule
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
