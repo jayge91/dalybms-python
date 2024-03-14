@@ -78,7 +78,7 @@ def construct_ha_conf(device_class, name, state_topic, unit_of_measurement, valu
     if name:
         ha_conf["name"] = name
     if state_topic:
-        ha_conf["state_topic] = state_topic
+        ha_conf["state_topic"] = state_topic
     if unit_of_measurement:
         ha_conf["value_template"] = value_template
     if entity_category:
