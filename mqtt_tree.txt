@@ -1,0 +1,68 @@
+# MQTT Topic Tree: (Commented Means Implemented)
+    /MQTT_DISCOVERY_PREFIX # homeassistant
+        /sensor
+            /DEVICE_ID # Daly-Smart-BMS
+                /Status
+                    #/State(str: "idle", "charging", "discharging")
+                        # /config
+                        /state
+                    # #/SOC # (%)
+                        # /config
+                        /state
+                    # /Charge MOS # (on/off) (entity_category="diagnostic")
+                        # /config
+                        /state
+                    # /Discharge MOS # (on/off) (entity_category="diagnostic")
+                        # /config
+                        /state
+                    # /Heartbeat # (int) (entity_category="diagnostic")
+                        # /config
+                        /state
+
+                /Voltage
+                    # /Pack # (V)
+                        # /config
+                        /state
+                    # /Balance # (V)
+                        # /config
+			            /state
+                    /Highest Cell # (V)
+                        /config
+                    /Lowest Cell # (V)
+                        /config
+                    /Cell 1 # (V) (entity_category="diagnostic")
+                        /config
+                    /Cell 2 # (V) (entity_category="diagnostic")
+                        /config
+                    /Cell 3 # (V) (entity_category="diagnostic")
+                        /config
+                    /Cell 4 # (V) (entity_category="diagnostic")
+                        /config
+                    /Cell 5 # (V) (entity_category="diagnostic")
+                        /config
+                    /Cell 6 # (V) (entity_category="diagnostic")
+                        /config
+                    /Cell 7 # (V) (entity_category="diagnostic")
+                        /config
+                /Current # 
+		   	 		# /Amps (A)
+						# /config
+						/state
+                    # /Ah Remaining # (Ah)
+                        # /config
+                        /state
+                /Power
+                    # /Watts # (W)
+                        # /config
+                        /state
+                    # /KWh Remaining # (KWh)
+                        # /config
+                /Temperature # (*C)
+		            /Battery Temperature
+	              	    /config
+                # /Control
+                    # /Charge MOS Control # (on/off) (entity_category="config")
+                        # /config
+                    # /Discharge MOS Control # (on/off) (entity_category="config")
+                        # /config
+					
