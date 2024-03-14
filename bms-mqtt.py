@@ -412,7 +412,7 @@ def get_battery_state():
     currentAmps = int.from_bytes(buffer[8:10], byteorder='big', signed=False) / 10 - 3000
     statusSoc = int.from_bytes(buffer[10:12], byteorder='big', signed=False) / 10
 
-    if currentAmps = -3000:
+    if currentAmps == -3000:
         currentAmps = 0
 
 
