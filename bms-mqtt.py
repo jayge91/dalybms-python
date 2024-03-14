@@ -72,7 +72,7 @@ def publish_mqtt_discovery_config(topic, config):
 
 # Function to construct JSON output strings for sensors discovery:
 def construct_ha_conf(device_class, name, state_topic, unit_of_measurement, value_template, unique_id, entity_category):
-    ha_conf = {
+    ha_conf = {} # trying to initialize dictionary
     if device_class:
         ha_conf["device_class"] = device_class
     if name:
@@ -83,7 +83,6 @@ def construct_ha_conf(device_class, name, state_topic, unit_of_measurement, valu
         ha_conf["value_template"] = value_template
     if entity_category:
         ha_conf["entity_category"] = entity_category
-    }
         
     ha_conf["device"] = {
         "manufacturer": "Daly Electronics",
