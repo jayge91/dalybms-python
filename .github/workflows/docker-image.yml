@@ -26,5 +26,5 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: jayge91/dalybms-python:latest,${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
