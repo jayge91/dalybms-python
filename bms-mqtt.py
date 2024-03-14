@@ -159,7 +159,7 @@ statusCellCountHaConf =   construct_ha_conf(
     unit_of_measurement = None,
     unique_id =           DEVICE_ID + '_status_discharge_mos',
     entity_category =     "diagnostic"
-
+)
 
 
 statusHeartbeat = None
