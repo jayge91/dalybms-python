@@ -178,7 +178,7 @@ publish_mqtt_discovery_config(STATUS_SOC_TOPIC + '/config', json.dumps(statusSoc
 publish_mqtt_discovery_config(STATUS_CHARGE_MOS_TOPIC + '/config', json.dumps(statusChargeMosHaConf))
 publish_mqtt_discovery_config(STATUS_DISCHARGE_MOS_TOPIC + '/config', json.dumps(statusDischargeMosHaConf))
 publish_mqtt_discovery_config(STATUS_CELL_COUNT_TOPIC + '/config', json.dumps(statusCellCountHaConf))
-publish_mqtt_discovery_config(STATUS_HEARTBEAT_TOPIC + '/config', json.dumps(statusHeartbeatMosHaConf))
+publish_mqtt_discovery_config(STATUS_HEARTBEAT_TOPIC + '/config', json.dumps(statusHeartbeatHaConf))
 
 
 # Voltage:
