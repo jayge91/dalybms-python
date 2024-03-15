@@ -473,10 +473,9 @@ def get_battery_mos_status():
 
 
 while True:
-    get_bms_status_info()
+    get_battery_status()
     get_battery_state()
     get_cell_balance(statusCellCount)
-    get_battery_status()
     get_battery_temp()
     get_battery_mos_status()
     time.sleep(1)
