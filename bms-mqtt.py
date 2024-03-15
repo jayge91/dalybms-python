@@ -237,8 +237,8 @@ currentAhRemainingHaConf = construct_ha_conf(
     entity_category =     "diagnostic"
 )
 
-publish_mqtt_discovery_config(CURRENT_AMPS_TOPIC + '/config', json.dumps(currentAmpsHaconf))
-publish_mqtt_discovery_config(CURRENT_AH_REMAINING_TOPIC + '/config', json.dumps(currentAhRemainingHaconf))
+publish_mqtt_discovery_config(CURRENT_AMPS_TOPIC + '/config', json.dumps(currentAmpsHaConf))
+publish_mqtt_discovery_config(CURRENT_AH_REMAINING_TOPIC + '/config', json.dumps(currentAhRemainingHaConf))
 
 
 # Power:
@@ -267,7 +267,7 @@ powerKwhRemainingHaConf = construct_ha_conf(
     entity_category =     None
 )
 
-publish_mqtt_discovery_config(POWER_WATTS_TOPIC + '/config', json.dumps(powerWattsHaconf))
+publish_mqtt_discovery_config(POWER_WATTS_TOPIC + '/config', json.dumps(powerWattsHaConf))
 publish_mqtt_discovery_config(POWER_KWH_REMAINING_TOPIC + '/config', json.dumps(powerKwhRemainingHaConf))
 
 
