@@ -391,13 +391,13 @@ def get_cell_balance(cell_count):
         sum += cells[i]
 
     ##NEED COMPLETE
-    voltageCell1
-    voltageCell2
-    voltageCell3
-    voltageCell4
-    voltageCell5
-    voltageCell6
-    voltageCell7
+    # voltageCell1
+    # voltageCell2
+    # voltageCell3
+    # voltageCell4
+    # voltageCell5
+    # voltageCell6
+    # voltageCell7
 
 def get_battery_state():
     res = cmd(b'\xa5\x40\x90\x08\x00\x00\x00\x00\x00\x00\x00\x00\x7d')
