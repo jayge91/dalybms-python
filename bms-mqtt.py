@@ -37,6 +37,8 @@ check_environment_variable('MQTT_PASS')
 check_environment_variable('MQTT_CLIENT_ID')
 check_environment_variable('MQTT_DISCOVERY_PREFIX')
 check_environment_variable('DEVICE_ID')
+check_environment_variable('CELL_COUNT')
+
 
 DEVICE = os.environ['DEVICE'] # /dev/ttyS1
 MQTT_SERVER = os.environ['MQTT_SERVER'] # core-mosquitto
@@ -45,7 +47,7 @@ MQTT_PASS = os.environ['MQTT_PASS'] # mqtt
 MQTT_CLIENT_ID = os.environ['MQTT_CLIENT_ID'] # dalybms
 MQTT_DISCOVERY_PREFIX = os.environ['MQTT_DISCOVERY_PREFIX'] # homeassistant
 DEVICE_ID = os.environ['DEVICE_ID'] # Daly-Smart-BMS
-# CELL_COUNT = int(os.environ['CELL_COUNT']) # later won't be needed
+CELL_COUNT = int(os.environ['CELL_COUNT']) # later won't be needed
 
 
 ## Connect to MQTT:
@@ -373,7 +375,7 @@ def extract_cells_v(buffer):
     ]
 
 # Function to get individual cell voltages:
-def get_cell_balance(statusCellCount):
+def get_cell_balance(cell_count):
     res = cmd(b'\xa5\x40\x95\x08\x00\x00\x00\x00\x00\x00\x00\x00\x82')
     if len(res) < 1:
         print('Empty response get_cell_balance')
@@ -381,10 +383,10 @@ def get_cell_balance(statusCellCount):
     cells = []
     for frame in res:
         cells += extract_cells_v(frame)
-    cells = cells[:statusCellCount]
+    cells = cells[:cell_count]
 
     sum = 0
-    for i in range(statusCellCount):
+    for i in range(cell_count):
         cells[i] = cells[i]/1000
         sum += cells[i]
 
@@ -473,7 +475,7 @@ def get_battery_mos_status():
 while True:
     get_battery_status()
     get_battery_state()
-    get_cell_balance(statusCellCount)
+    get_cell_balance(CELL_COUNT)
     get_battery_temp()
     get_battery_mos_status()
     time.sleep(1)
