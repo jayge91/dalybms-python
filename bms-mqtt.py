@@ -136,9 +136,9 @@ statusChargeMosHaConf =   construct_ha_conf(
     entity_category =     "diagnostic"
 )
 
-statusChargeMos = None
+statusDischargeMos = None
 STATUS_DISCHARGE_MOS_TOPIC = MQTT_BASE_TOPIC + '/Status/Discharge MOS'
-statusChargeMosHaConf =   construct_ha_conf(
+statusDischargeMosHaConf =   construct_ha_conf(
     device_class =        None,
     name =                "Disharge MOS status",
     state_topic =         STATUS_DISCHARGE_MOS_TOPIC + '/state',
