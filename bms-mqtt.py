@@ -119,7 +119,8 @@ def construct_ha_conf(name, device_class, state_topic, unit_of_measurement, valu
     # https://www.home-assistant.io/integrations/sensor/
     # https://www.home-assistant.io/integrations/sensor#device-class
     # https://www.home-assistant.io/integrations/switch/
-    
+
+
 # Status: 
 
 statusState = 999
@@ -337,6 +338,32 @@ publish_mqtt_discovery_config(CONTROL_DISCHARGE_MOS_TOPIC + '/config', json.dump
 
 # Variables that are not yet used:
 gatherTotalVoltage = None # 0x90 - byte 2-3 - Gather total voltage (0.1 V)
+
+## From siysolarforum.com:
+# Command 0xDA appears to address the Charge Control feature with this command switching the MOSFET on
+# Code:
+# -> A540DA080100000000000000C8
+# <- A501DA0801xxxxxxxxxxxxxxyy
+# As it seems replies the BMS only with the first byte (0x01) as the following bytes are remains of the previous message.
+
+# To switch the charging MOSFET off again:
+# Code:
+# -> A540DA080000000000000000C7
+# <- A501DA0800xxxxxxxxxxxxxxyy
+
+
+# Command 0xD9 appears to address the Discharge Control feature with this command switching the MOSFET on
+# Code:
+# -> A540D9080100000000000000C7
+# <- A501D90801xxxxxxxxxxxxxxyy
+# As it seems replies the BMS only with the first byte (0x01) as the following bytes are remains of the previous message.
+
+# To switch the charging MOSFET off again:
+# Code:
+# -> A540D9080000000000000000C6
+# <- A501D90800xxxxxxxxxxxxxxyy
+
+
 
 
 
