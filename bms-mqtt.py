@@ -37,7 +37,6 @@ check_environment_variable('MQTT_PASS')
 check_environment_variable('MQTT_CLIENT_ID')
 check_environment_variable('MQTT_DISCOVERY_PREFIX')
 check_environment_variable('DEVICE_ID')
-check_environment_variable('CELL_COUNT')
 
 DEVICE = os.environ['DEVICE'] # /dev/ttyS1
 MQTT_SERVER = os.environ['MQTT_SERVER'] # core-mosquitto
