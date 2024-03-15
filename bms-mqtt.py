@@ -98,11 +98,10 @@ def construct_ha_conf(name, device_class, state_topic, unit_of_measurement, valu
         ha_conf["value_template"] = value_template
     if device_class:
         ha_conf["device_class"] = device_class
-    if entity_category:
-        ha_conf["entity_category"] = entity_category
     if unique_id:
         ha_conf["unique_id"] = unique_id
-
+    if entity_category:
+        ha_conf["entity_category"] = entity_category
         
     ha_conf["device"] = {
         "manufacturer": "Daly Electronics",
@@ -134,6 +133,7 @@ statusStateHaConf =       construct_ha_conf(
     unique_id =           DEVICE_ID + '_status_state',
     entity_category =     None
 )
+publish_mqtt_discovery_config(STATUS_STATE_TOPIC + '/config', json.dumps(statusStateHaConf))
 
 statusSoc = 999
 STATUS_SOC_TOPIC =        MQTT_SENSOR_TOPIC + '_Status_SOC'
@@ -146,6 +146,7 @@ statusSocHaConf =         construct_ha_conf(
     unique_id =           DEVICE_ID + '_status_soc',
     entity_category =     None
 )
+publish_mqtt_discovery_config(STATUS_SOC_TOPIC + '/config', json.dumps(statusSocHaConf))
 
 statusChargeMos = ""
 STATUS_CHARGE_MOS_TOPIC = MQTT_BINARY_SENSOR_TOPIC + '_Status_Charge_MOS'
@@ -158,8 +159,9 @@ statusChargeMosHaConf =   construct_ha_conf(
     unique_id =           DEVICE_ID + '_status_charge_mos',
     entity_category =     "diagnostic"
 )
+publish_mqtt_discovery_config(STATUS_CHARGE_MOS_TOPIC + '/config', json.dumps(statusChargeMosHaConf))
 
-statusDischargeMos = ""
+statusDischargeMos = false
 STATUS_DISCHARGE_MOS_TOPIC = MQTT_BINARY_SENSOR_TOPIC + '_Status_Discharge_MOS'
 statusDischargeMosHaConf =   construct_ha_conf(
     device_class =        None,
@@ -170,6 +172,7 @@ statusDischargeMosHaConf =   construct_ha_conf(
     unique_id =           DEVICE_ID + '_status_discharge_mos',
     entity_category =     "diagnostic"
 )
+publish_mqtt_discovery_config(STATUS_DISCHARGE_MOS_TOPIC + '/config', json.dumps(statusDischargeMosHaConf))
 
 statusCellCount = 7
 STATUS_CELL_COUNT_TOPIC = MQTT_SENSOR_TOPIC + '_Status_Cell_Count'
@@ -182,6 +185,7 @@ statusCellCountHaConf =   construct_ha_conf(
     unique_id =           DEVICE_ID + '_status_cell_count',
     entity_category =     "diagnostic"
 )
+publish_mqtt_discovery_config(STATUS_CELL_COUNT_TOPIC + '/config', json.dumps(statusCellCountHaConf))
 
 
 statusHeartbeat = 999
@@ -195,12 +199,6 @@ statusHeartbeatHaConf =   construct_ha_conf(
     unique_id =           DEVICE_ID + '_status_heartbeat',
     entity_category =     "diagnostic"
 )
-
-publish_mqtt_discovery_config(STATUS_STATE_TOPIC + '/config', json.dumps(statusStateHaConf))
-publish_mqtt_discovery_config(STATUS_SOC_TOPIC + '/config', json.dumps(statusSocHaConf))
-publish_mqtt_discovery_config(STATUS_CHARGE_MOS_TOPIC + '/config', json.dumps(statusChargeMosHaConf))
-publish_mqtt_discovery_config(STATUS_DISCHARGE_MOS_TOPIC + '/config', json.dumps(statusDischargeMosHaConf))
-publish_mqtt_discovery_config(STATUS_CELL_COUNT_TOPIC + '/config', json.dumps(statusCellCountHaConf))
 publish_mqtt_discovery_config(STATUS_HEARTBEAT_TOPIC + '/config', json.dumps(statusHeartbeatHaConf))
 
 
@@ -217,6 +215,7 @@ voltagePackHaConf =       construct_ha_conf(
     unique_id =           DEVICE_ID + '_voltage_pack',
     entity_category =     None
 )
+publish_mqtt_discovery_config(VOLTAGE_PACK_TOPIC + '/config', json.dumps(voltagePackHaConf))
 
 voltageBalance = 999
 VOLTAGE_BALANCE_TOPIC =   MQTT_SENSOR_TOPIC + '_Voltage_Balance'
@@ -229,8 +228,6 @@ voltageBalanceHaConf =    construct_ha_conf(
     unique_id =           DEVICE_ID + '_voltage_balance',
     entity_category =     "diagnostic"
 )
-
-publish_mqtt_discovery_config(VOLTAGE_PACK_TOPIC + '/config', json.dumps(voltagePackHaConf))
 publish_mqtt_discovery_config(VOLTAGE_BALANCE_TOPIC + '/config', json.dumps(voltageBalanceHaConf))
 
 
@@ -247,6 +244,7 @@ currentAmpsHaConf =       construct_ha_conf(
     unique_id =           DEVICE_ID + '_current_amps',
     entity_category =     None
 )
+publish_mqtt_discovery_config(CURRENT_AMPS_TOPIC + '/config', json.dumps(currentAmpsHaConf))
 
 currentAhRemaining = 999
 CURRENT_AH_REMAINING_TOPIC = MQTT_SENSOR_TOPIC + '_Current_Ah_Remaining'
@@ -259,8 +257,6 @@ currentAhRemainingHaConf = construct_ha_conf(
     unique_id =           DEVICE_ID + '_current_ah_remaining',
     entity_category =     "diagnostic"
 )
-
-publish_mqtt_discovery_config(CURRENT_AMPS_TOPIC + '/config', json.dumps(currentAmpsHaConf))
 publish_mqtt_discovery_config(CURRENT_AH_REMAINING_TOPIC + '/config', json.dumps(currentAhRemainingHaConf))
 
 
@@ -277,6 +273,7 @@ powerWattsHaConf =        construct_ha_conf(
     unique_id =           DEVICE_ID + '_power_watts',
     entity_category =     None
 )
+publish_mqtt_discovery_config(POWER_WATTS_TOPIC + '/config', json.dumps(powerWattsHaConf))
 
 powerKwh = 999
 POWER_KWH_REMAINING_TOPIC = MQTT_SENSOR_TOPIC + '_Power_KWh_Remaining'
@@ -289,8 +286,6 @@ powerKwhRemainingHaConf = construct_ha_conf(
     unique_id =           DEVICE_ID + '_power_kwh_remaining',
     entity_category =     None
 )
-
-publish_mqtt_discovery_config(POWER_WATTS_TOPIC + '/config', json.dumps(powerWattsHaConf))
 publish_mqtt_discovery_config(POWER_KWH_REMAINING_TOPIC + '/config', json.dumps(powerKwhRemainingHaConf))
 
 
@@ -307,7 +302,6 @@ temperatureBatteryHaConf = construct_ha_conf(
     unique_id =           DEVICE_ID + '_temperature_battery',
     entity_category =     None
 )
-
 publish_mqtt_discovery_config(TEMPERATURE_BATTERY_TOPIC + '/config', json.dumps(temperatureBatteryHaConf))
 
 
@@ -324,6 +318,7 @@ controlChargeMosHaConf = construct_ha_conf(
     unique_id =           DEVICE_ID + '_control_charge_mos',
     entity_category =     "configuration"
 )
+publish_mqtt_discovery_config(CONTROL_CHARGE_MOS_TOPIC + '/config', json.dumps(controlChargeMosHaConf))
 
 controlDischargeMos = 999
 CONTROL_DISCHARGE_MOS_TOPIC = MQTT_SWITCH_TOPIC + '_Control_Discharge_MOS'
@@ -336,14 +331,12 @@ controlDischargeMosHaConf = construct_ha_conf(
     unique_id =           DEVICE_ID + '_control_discharge_mos',
     entity_category =     "configuration"
 )
-
-publish_mqtt_discovery_config(CONTROL_CHARGE_MOS_TOPIC + '/config', json.dumps(controlChargeMosHaConf))
 publish_mqtt_discovery_config(CONTROL_DISCHARGE_MOS_TOPIC + '/config', json.dumps(controlDischargeMosHaConf))
 
 
 
 # Variables that are not yet used:
-gatherTotalVoltage = None #0x90 - byte 2-3 - Gather total voltage (0.1 V)
+gatherTotalVoltage = None # 0x90 - byte 2-3 - Gather total voltage (0.1 V)
 
 
 
