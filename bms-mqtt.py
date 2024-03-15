@@ -502,12 +502,12 @@ def get_battery_mos_status():
     publish(STATUS_STATE_TOPIC, statusState)
     
     statusChargeMos = int.from_bytes(buffer[5:6], byteorder='big', signed=False)
-    statusChargeMos = true if statusChargeMos == 1 else (false if statusChargeMos == 0 else 'Unknown')
+    statusChargeMos = 'on' if statusChargeMos == 1 else ('off if statusChargeMos == 0 else 'Unknown')
     print("statusChargeMos: " + str(statusChargeMos))
     publish(STATUS_CHARGE_MOS_TOPIC, statusChargeMos)
     
     statusDischargeMos = int.from_bytes(buffer[6:7], byteorder='big', signed=False)
-    statusDischargeMos = true if statusDischargeMos == 1 else (false if statusDischargeMos == 0 else 'Unknown')
+    statusDischargeMos = 'on' if statusDischargeMos == 1 else ('off' if statusDischargeMos == 0 else 'Unknown')
     print("statusDischargeMos: " + str(statusDischargeMos))
     publish(STATUS_DISCHARGE_MOS_TOPIC, statusDischargeMos)
     
