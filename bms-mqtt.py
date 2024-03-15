@@ -150,7 +150,7 @@ statusDischargeMosHaConf =   construct_ha_conf(
     entity_category =     "diagnostic"
 )
 
-statusCellCount = None
+statusCellCount = 7
 STATUS_CELL_COUNT_TOPIC = MQTT_BASE_TOPIC + '/Status/Cell Count'
 statusCellCountHaConf =   construct_ha_conf(
     device_class =        None,
