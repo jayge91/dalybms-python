@@ -114,7 +114,7 @@ statusStateHaConf =       construct_ha_conf(
 
 statusSoc = None
 STATUS_SOC_TOPIC =        MQTT_BASE_TOPIC + '/Status/SOC'
-statuSocHaConf =          construct_ha_conf(
+statusSocHaConf =          construct_ha_conf(
     device_class =        "battery",
     name =                "SOC",
     state_topic =         STATUS_SOC_TOPIC + '/state',
