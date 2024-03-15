@@ -53,6 +53,8 @@ client = mqtt.Client(client_id=os.environ['MQTT_CLIENT_ID'])
 client.username_pw_set(os.environ['MQTT_USER'], os.environ['MQTT_PASS'])
 client.connect(os.environ['MQTT_SERVER'])
 
+## Connect to Serial Port:
+ser = serial.Serial(os.environ['DEVICE'], 9600, timeout=1)
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -329,7 +331,7 @@ gatherTotalVoltage = None #0x90 - byte 2-3 - Gather total voltage (0.1 V)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 
-
+# Function to send serial commands to BMS:
 def cmd(command):
     res = []
     ser.write(command)
@@ -341,7 +343,7 @@ def cmd(command):
         res.append(s)
     return res
 
-
+# Function to publish MQTT data for sensors:
 def publish(topic, data):
     try:
         client.publish(topic, data, 0, False)
@@ -362,7 +364,7 @@ def get_bit_status(byte):
 # bit_status = get_bit_status(byte_value)
 # print(bit_status)  # Output: [0, 1, 0, 1, 0, 1, 0, 1]
 
-
+# Function to extract the cell voltages from the buffer:
 def extract_cells_v(buffer):
     return [
         int.from_bytes(buffer[5:7], byteorder='big', signed=False),
@@ -370,11 +372,7 @@ def extract_cells_v(buffer):
         int.from_bytes(buffer[9:11], byteorder='big', signed=False)
     ]
 
-
-
-
-
-##################################################################
+# Function to get individual cell voltages:
 def get_cell_balance(statusCellCount):
     res = cmd(b'\xa5\x40\x95\x08\x00\x00\x00\x00\x00\x00\x00\x00\x82')
     if len(res) < 1:
