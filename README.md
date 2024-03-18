@@ -1,5 +1,8 @@
 # Daly Smart BMS Python Script
 Python Script that monitors a Daly Smart BMS through UART USB and publishes the data to MQTT. If environment variable is enabled (not yet implemented), MQTT Discovery Topics will be published for HomeAssistant build in, so no need to add the sensors manually to HA.
+## Testing Branch:
+monitor_main.py will be loaded from /config (much faster to edit in place than rebuild docker image)
+
 
 ## This is a work in Progress!
 
