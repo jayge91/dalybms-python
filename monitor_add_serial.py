@@ -1,3 +1,6 @@
+# monitor_add_serial.py
+
+
 import serial
 import time
 import os
@@ -42,6 +45,9 @@ def serial_communication(ser, serial_x90_queue, serial_x91_queue, serial_x92_que
             print("No response from device.")
         ser.flushInput()
         time.sleep(wait_between_time)  # Adjust sleep time as needed
+#
+#
+        # 0x91: Maximum & Minimum voltage
 #
 #
         # 0x92: Maximum & Minimum temperature
@@ -206,6 +212,10 @@ def serial_x90_handling(serial_x90_queue, mqtt_state_data_queue):        # 0x90:
             pass  # Queue is empty, continue loop
 #
 #
+#(pending) def serial_x91_handling(serial_x91_queue, mqtt_state_data_queue):        # 0x91: Maximum & Minimum voltage
+
+#
+#
 def serial_x92_handling(serial_x92_queue, mqtt_state_data_queue):        # 0x92: Maximum & Minimum temperature
     MQTT_SENSOR_TOPIC = os.environ['MQTT_DISCOVERY_PREFIX'] + '/sensor/' + os.environ['DEVICE_ID'] # "homeassistant/sensor/Daly-Smart-BMS"
     while True:
@@ -231,7 +241,8 @@ def serial_x92_handling(serial_x92_queue, mqtt_state_data_queue):        # 0x92:
             pass
 #
 #
-# def serial_x93_handling(serial_x93_queue, mqtt_state_data_queue):        # 0x93: Charge & Discharge MOS Status, Remaining Ah
+#(pending) def serial_x93_handling(serial_x93_queue, mqtt_state_data_queue):        # 0x93: Charge & Discharge MOS Status, Remaining Ah
+
 '''
 def get_battery_mos_status():
     res = cmd(b'\xa5\x40\x93\x08\x00\x00\x00\x00\x00\x00\x00\x00\x80')
@@ -326,3 +337,12 @@ def serial_x95_handling(serial_x95_queue, mqtt_state_data_queue):        # 0x95:
             mqtt_state_data_queue.put({topic: value for topic, value in cells})
          except queue.Empty:
             pass
+#
+#
+#(pending) def serial_x96_handling(serial_x96_queue, mqtt_state_data_queue):        # 0x96: Cell 1~16 Temperature
+#
+#
+#(pending) def serial_x97_handling(serial_x97_queue, mqtt_state_data_queue):        # 0x97: Cell balance State 1~48
+#
+#
+#(pending) def serial_x98_handling(serial_x98_queue, mqtt_state_data_queue):        # 0x98: Battery failure status

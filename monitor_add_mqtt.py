@@ -1,4 +1,4 @@
-# bms-mqtt-discovery.py
+# monitor_add_mqtt.py
 
 import serial
 import time

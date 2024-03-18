@@ -19,10 +19,13 @@ import binascii
 import time
 import os
 import paho.mqtt.client as mqtt
+import multiprocessing
 
-# Import other parts:
-import bms-mqtt-serial # bring in bms-mqtt-serial.py
-import bms-mqtt-mqtt # bring in bms-mqtt-mqtt.py
+# Load monitor-mqtt.py:
+import monitor_add_mqtt
+
+# Load monitor-serial.py:
+import monitor_add_serial
 
 
 ## Import Environment Variables:
@@ -102,17 +105,51 @@ if __name__ == "__main__":
     mqtt_connection_process = multiprocessing.Process(target=mqtt_connection)
     mqtt_data_handling_process = multiprocessing.Process(target=mqtt_data_handling, args=(mqtt_state_data_queue,))
 
-    serial_communication_process = multiprocessing.Process(target=serial_communication, args=(ser, mqtt_data_queue))
+    serial_communication_process = multiprocessing.Process(target=serial_communication, args=(ser, mqtt_state_data_queue))
     serial_x90_handling_process = multiprocessing.Process(target=serial_x90_handling, args=(serial_x90_queue, mqtt_state_data_queue))
+    #(pending) serial_x91_handling_process = multiprocessing.Process(target=serial_x91_handling, args=(serial_x91_queue, mqtt_state_data_queue))
     serial_x92_handling_process = multiprocessing.Process(target=serial_x92_handling, args=(serial_x92_queue, mqtt_state_data_queue))
+    #(pending) serial_x93_handling_process = multiprocessing.Process(target=serial_x93_handling, args=(serial_x93_queue, mqtt_state_data_queue))
+    serial_x94_handling_process = multiprocessing.Process(target=serial_x94_handling, args=(serial_x94_queue, mqtt_state_data_queue))
+    serial_x95_handling_process = multiprocessing.Process(target=serial_x95_handling, args=(serial_x95_queue, mqtt_state_data_queue))
+    #(pending) serial_x96_handling_process = multiprocessing.Process(target=serial_x96_handling, args=(serial_x96_queue, mqtt_state_data_queue))
+    #(pending) serial_x97_handling_process = multiprocessing.Process(target=serial_x97_handling, args=(serial_x97_queue, mqtt_state_data_queue))
+    #(pending) serial_x98_handling_process = multiprocessing.Process(target=serial_x98_handling, args=(serial_x98_queue, mqtt_state_data_queue))
 
-
-    send_mqtt_discovery_configs()
-
-    serial_process.start()
+    # Start MQTT First:
     mqtt_connection_process.start()
-    mqtt_data_handling_process.start()
 
-    serial_process.join()
+    # Give MQTT Time to get ready:
+    time.sleep(5)
+    
+    # Start
+    mqtt_communication_process.start()
+    mqtt_data_handling_process.start()
+    serial_communication_process.start()
+
+    serial_x90_handling_process.start()
+    #(pending) serial_x91_handling_process.start()
+    serial_x92_handling_process.start()
+    #(pending) serial_x93_handling_process.start()
+    serial_x94_handling_process.start()
+    serial_x95_handling_process.start()
+    #(pending) serial_x96_handling_process.start()
+    #(pending) serial_x97_handling_process.start()
+    #(pending) serial_x98_handling_process.start()
+
+
+
+    serial_communication_process.join()
     mqtt_connection_process.join()
     mqtt_data_handling_process.join()
+    
+    
+    serial_x90_handling_process.join()
+    serial_x91_handling_process.join()
+    serial_x92_handling_process.join()
+    #(pending) serial_x93_handling_process.join()
+    serial_x94_handling_process.join()
+    serial_x95_handling_process.join()
+    #(pending) serial_x96_handling_process.join()
+    #(pending) serial_x97_handling_process.join()
+    #(pending) serial_x98_handling_process.join()
