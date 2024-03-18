@@ -7,7 +7,7 @@ I'm still far from finished, and I'm taking inspiration from lots of sources, so
 
 ChatGPT has been teaching me python lol!
 
-Biggest Sources for information and inspiration:
+### Biggest Sources for information and inspiration:
 - https://github.com/MindFreeze/dalybms
 - https://github.com/jblance/mpp-solar/blob/master/docs/protocols/DALY-Daly_RS485_UART_Protocol.pdf
 - https://diysolarforum.com/threads/decoding-the-daly-smartbms-protocol.21898/
