@@ -4,6 +4,8 @@ import os
 import queue
 
 # Function for managing serial communication
+#
+#
 def serial_communication(ser, serial_x90_queue, serial_x91_queue, serial_x92_queue, serial_x93_queue, serial_x94_queue, serial_x95_queue, serial_x96_queue, serial_x97_queue, serial_x98_queue):
     wait_between_time = 5
     while True:
@@ -34,7 +36,27 @@ def serial_communication(ser, serial_x90_queue, serial_x91_queue, serial_x92_que
             print("No response from device.")
         ser.flushInput()
         time.sleep(wait_between_time)  # Adjust sleep time as needed
-
+#        
+#
+        # 0x93: Charge & Discharge MOS Status
+#
+#
+        # 0x94: 
+        x94_command = b'\xa5\x40\x94\x08\x00\x00\x00\x00\x00\x00\x00\x00\x81'
+        print("Command: " + str(x94_command))
+        ser.write(x94_command)
+        time.sleep(0.1)  # Adjust delay as needed
+        while True:
+            x94_response = ser.read(13)
+            if (x94_response == b''):
+                break
+            res.append(x94_response)
+        if x94_response:
+            serial_x94_queue.put(x94_response)
+        else:
+            print("No response from device.")
+        ser.flushInput()
+        time.sleep(wait_between_time)  # Adjust sleep time as needed
 #
 #
         # 0x95: Cell voltage 1~48
@@ -51,10 +73,79 @@ def serial_communication(ser, serial_x90_queue, serial_x91_queue, serial_x92_que
             serial_x95_queue.put(x95_response)
         else:
             print("No response from device.")
+        ser.flushInput
         time.sleep(wait_between_time)  # Adjust sleep time as needed
-        ser.flushInput()
 #
 #
+        # 0x96: Cell 1~16 Temperature
+#
+#
+        # 0x97: Cell balance State 1~48
+#
+#
+        # 0x98: Battery failure status
+        # 0->No error 1->Error
+        # Byte 0
+        # Bit 0: Cell volt high level 1
+        # Bit 1: Cell volt high level 2
+        # Bit 2: Cell volt low level 1
+        # Bit 3: Cell volt low level 2
+        # Bit 4: Sum volt high level 1
+        # Bit 5: Sum volt high level 2
+        # Bit 6: Sum volt low level 1
+        # Bit 7: Sum volt low level 2
+        # Byte 1
+        # Bit 0: Chg temp high level 1
+        # Bit 1: Chg temp high level 2
+        # Bit 2: Chg temp low level 1
+        # Bit 3: Chg temp low level 2
+        # Bit 4: Dischg temp high level 1
+        # Bit 5: Dischg temp high level 2
+        # Bit 6: Dischg temp low level 1
+        # Bit 7: Dischg temp low level 2
+        # Byte 2
+        # Bit 0: Chg overcurrent level 1
+        # Bit 1: Chg overcurrent level 2
+        # Bit 2: Dischg overcurrent level 1
+        # Bit 3: Dischg overcurrent level 2
+        # Bit 4: SOC high level 1
+        # Bit 5: SOC high level 2
+        # Bit 6: SOC Low level 1
+        # Bit 7: SOC Low level 2
+        # Byte 3
+        # Bit 0: Diff volt level 1
+        # Bit 1: Diff volt level 2
+        # Bit 2: Diff temp level 1
+        # Bit 3: Diff temp level 2
+        # Bit 4~Bit7:Reserved
+        # Byte 4
+        # Bit 0: Chg MOS temp high alarm
+        # Bit 1: Dischg MOS temp high alarm
+        # Bit 2: Chg MOS temp sensor err
+        # Bit 3: Dischg MOS temp sensor err
+        # Bit 4: Chg MOS adhesion err
+        # Bit 5: Dischg MOS adhesion err
+        # Bit 6: Chg MOS open circuit err
+        # Bit 7: Discrg MOS open circuit err
+        # Byte 5
+        # Bit 0: AFE collect chip err
+        # Bit 1: Voltage collect dropped
+        # Bit 2: Cell temp sensor err
+        # Bit 3: EEPROM err
+        # Bit 4: RTC err
+        # Bit 5: Precharge failure
+        # Bit 6: Communication failure
+        # Bit 7: Internal communication failure
+        # Byte6
+        # Bit 0: Current module fault
+        # Bit 1: Sum voltage detect fault
+        # Bit 2: Short circuit protect fault
+        # Bit 3: Low volt forbidden chg fault
+        # Bit4-Bit7:Reserved
+        # Byte7: Fault code
+#
+#
+
 
 
 # Functions for handling serial data responses
@@ -67,7 +158,7 @@ def serial_x90_handling(serial_x90_queue, mqtt_state_data_queue):
         try:
             response = serial_x90_queue.get(timeout=5)
             print("0x90 Response: " + str(response))
-            # if response = b'xa5\x10\x90\x00\x00\x00\x00\x00\x00\x00\x00\x4d' # add case for when bms is sleeping and responds with all zeros
+            # if response = b'xa5\x10\x90\x08\x00\x00\x00\x00\x00\x00\x00\x00\x4d' # add case for when bms is sleeping and responds with all zeros
             buffer = response[0]
             
             pack_voltage = int.from_bytes(buffer[4:6], byteorder='big', signed=False) / 10
@@ -123,8 +214,43 @@ def serial_x92_handling(serial_x92_queue, mqtt_state_data_queue):
             })
         except queue.Empty:
             pass
+#
+#
+def serial_x94_handling(serial_x94_queue, mqtt_state_data_queue):
+    MQTT_SENSOR_TOPIC = os.environ['MQTT_DISCOVERY_PREFIX'] + '/sensor/' + os.environ['DEVICE_ID'] # "homeassistant/sensor/Daly-Smart-BMS"
+    MQTT_BINARY_SENSOR_TOPIC = os.environ['MQTT_DISCOVERY_PREFIX'] + '/binary_sensor/' + os.environ['DEVICE_ID'] # "homeassistant/binary_sensor/Daly-Smart-BMS"
+    # 0x90: SOC, total voltage, current
+    while True:
+        try:
+            response = serial_x94_queue.get(timeout=5)
+            print("0x94 Response: " + str(response))
+            buffer = response[0]
 
-
+            cells_count = int.from_bytes(buffer[4:5], byteorder='big', signed=False)
+            cells_count_topic = MQTT_SENSOR_TOPIC + '_Status_Cell_Count'
+            cycles = int.from_bytes(buffer[9:11], byteorder='big', signed=False)  
+            cycles_topic = MQTT_SENSOR_TOPIC + '_Status_Cycles'
+            charger = 'true' if int.from_bytes(buffer[6:7], byteorder='big', signed=False) == 1 else 'false'
+            charger_topic = MQTT_BINARY_SENSOR_TOPIC + '_Status_Charger'
+            load = 'true' if int.from_bytes(buffer[7:8], byteorder='big', signed=False) == 1 else 'false'
+            load_topic = MQTT_BINARY_SENSOR_TOPIC + '_Status_Load'
+            
+            print("cells_count: " + str(cells_count))
+            print("cycles: " + str(cycles))
+            print("charger: " + str(charger))
+            print("load: " + str(load))
+            
+            mqtt_state_data_queue.put({
+                cells_count_topic: cells_count,
+                cycles_topic: cycles,
+                charger_topic: charger,
+                load_topic: load
+                
+            })
+        except queue.Empty:
+            pass
+#
+#
 def serial_x95_handling(serial_x95_queue, mqtt_state_data_queue):
     MQTT_SENSOR_TOPIC = os.environ['MQTT_DISCOVERY_PREFIX'] + '/sensor/' + os.environ['DEVICE_ID']
     # 0x95: Cell voltage 1~48

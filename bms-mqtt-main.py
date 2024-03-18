@@ -1,8 +1,9 @@
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Python Script by Jayge91 for monitoring and controlling Daly SMART BMS Devices.                   #
-# This script is designed to publish information and control topics over MQTT for Home Assistant.   #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+'''
+*Python Script by Jayge91 for monitoring and controlling Daly SMART BMS Devices.*
 
+This script is primarily designed to publish information and control topics over MQTT for use by Home Assistant.
+
+'''
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -60,32 +61,6 @@ CELL_COUNT = int(os.environ['CELL_COUNT']) # later won't be needed
 
 print("Environment Variables Imported!")
 
-
-
-
-## Connect to Serial Port:
-# print("Connecting to serial...")
-# ser = serial.Serial(os.environ['DEVICE'], 9600, timeout=1)
-# print("Serial Connected!")
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# Home Assistant Device Discovery:                                          #
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
-    
-
-
-
-
-
-
-
-
-
-
-# Variables that are not yet used:
-gatherTotalVoltage = None # 0x90 - byte 2-3 - Gather total voltage (0.1 V)
-
 ## From siysolarforum.com:
 # Command 0xDA appears to address the Charge Control feature with this command switching the MOSFET on
 # Code:
@@ -120,25 +95,25 @@ gatherTotalVoltage = None # 0x90 - byte 2-3 - Gather total voltage (0.1 V)
 
 
 # Function to send serial commands to BMS:
-def cmd(command):
-    print("Serial Command: " + str(command))
-    res = []
-    ser.write(command)
-    while True:
-        s = ser.read(13)
-        if (s == b''):
-            break
-        # print(binascii.hexlify(s, ' '))
-        res.append(s)
-    print("Serial Response: " + str(res))
-    return res
+# def cmd(command):
+    # print("Serial Command: " + str(command))
+    # res = []
+    # ser.write(command)
+    # while True:
+        # s = ser.read(13)
+        # if (s == b''):
+            # break
+        # # print(binascii.hexlify(s, ' '))
+        # res.append(s)
+    # print("Serial Response: " + str(res))
+    # return res
 
 # Function to publish MQTT data for sensors:  (under "./state")
-def publish(topic, data):
-    try:
-        client.publish(topic + '/state', data, 0, False)
-    except Exception as e:
-        print("Error sending to mqtt: " + str(e))
+# def publish(topic, data):
+    # try:
+        # client.publish(topic + '/state', data, 0, False)
+    # except Exception as e:
+        # print("Error sending to mqtt: " + str(e))
 
 
 # Function to break down a byte into individual bits:
@@ -155,28 +130,28 @@ def get_bit_status(byte):
 # print(bit_status)  # Output: [0, 1, 0, 1, 0, 1, 0, 1]
 
 # Function to extract the cell voltages from the buffer:
-def extract_cells_v(buffer):
-    return [
-        int.from_bytes(buffer[5:7], byteorder='big', signed=False),
-        int.from_bytes(buffer[7:9], byteorder='big', signed=False),
-        int.from_bytes(buffer[9:11], byteorder='big', signed=False)
-    ]
+# def extract_cells_v(buffer):
+    # return [
+        # int.from_bytes(buffer[5:7], byteorder='big', signed=False),
+        # int.from_bytes(buffer[7:9], byteorder='big', signed=False),
+        # int.from_bytes(buffer[9:11], byteorder='big', signed=False)
+    # ]
 
-# Function to get individual cell voltages:
-def get_cell_balance(cell_count):
-    res = cmd(b'\xa5\x40\x95\x08\x00\x00\x00\x00\x00\x00\x00\x00\x82')
-    if len(res) < 1:
-        print('Empty response get_cell_balance')
-        return
-    cells = []
-    for frame in res:
-        cells += extract_cells_v(frame)
-    cells = cells[:cell_count]
+# # Function to get individual cell voltages:
+# def get_cell_balance(cell_count):
+    # res = cmd(b'\xa5\x40\x95\x08\x00\x00\x00\x00\x00\x00\x00\x00\x82')
+    # if len(res) < 1:
+        # print('Empty response get_cell_balance')
+        # return
+    # cells = []
+    # for frame in res:
+        # cells += extract_cells_v(frame)
+    # cells = cells[:cell_count]
 
-    sum = 0
-    for i in range(cell_count - 1):
-        cells[i] = cells[i]/1000
-        sum += cells[i]
+    # sum = 0
+    # for i in range(cell_count - 1):
+        # cells[i] = cells[i]/1000
+        # sum += cells[i]
 
     ##NEED COMPLETE
     # voltageCell1
@@ -187,37 +162,37 @@ def get_cell_balance(cell_count):
     # voltageCell6
     # voltageCell7
 
-def get_battery_state():
-    res = cmd(b'\xa5\x40\x90\x08\x00\x00\x00\x00\x00\x00\x00\x00\x7d')
-    if len(res) < 1:
-        print('Empty response get_battery_state')
-        return
-    buffer = res[0]
+# def get_battery_state():
+    # res = cmd(b'\xa5\x40\x90\x08\x00\x00\x00\x00\x00\x00\x00\x00\x7d')
+    # if len(res) < 1:
+        # print('Empty response get_battery_state')
+        # return
+    # buffer = res[0]
     
-    voltagePack = int.from_bytes(buffer[4:6], byteorder='big', signed=False) / 10
-    gatherTotalVoltage = int.from_bytes(buffer[6:8], byteorder='big', signed=False) / 10
-    currentAmps = int.from_bytes(buffer[8:10], byteorder='big', signed=False) / 10 - 3000
-    statusSoc = int.from_bytes(buffer[10:12], byteorder='big', signed=False) / 10
+    # voltagePack = int.from_bytes(buffer[4:6], byteorder='big', signed=False) / 10
+    # gatherTotalVoltage = int.from_bytes(buffer[6:8], byteorder='big', signed=False) / 10
+    # currentAmps = int.from_bytes(buffer[8:10], byteorder='big', signed=False) / 10 - 3000
+    # statusSoc = int.from_bytes(buffer[10:12], byteorder='big', signed=False) / 10
 
-    if currentAmps == -3000:
-        currentAmps = 0
+    # if currentAmps == -3000:
+        # currentAmps = 0
 
-    print("voltagePack: " + str(voltagePack))
-    publish(VOLTAGE_PACK_TOPIC, voltagePack)
+    # print("voltagePack: " + str(voltagePack))
+    # publish(VOLTAGE_PACK_TOPIC, voltagePack)
     
-    print("gatherTotalVoltage: " + str(gatherTotalVoltage))
-    ## Later?
+    # print("gatherTotalVoltage: " + str(gatherTotalVoltage))
+    # ## Later?
     
-    print("currentAmps: " + str(currentAmps))
-    publish(CURRENT_AMPS_TOPIC, currentAmps)
+    # print("currentAmps: " + str(currentAmps))
+    # publish(CURRENT_AMPS_TOPIC, currentAmps)
     
-    print("statusSoc: " + str(statusSoc))
-    publish(STATUS_SOC_TOPIC, statusSoc)
+    # print("statusSoc: " + str(statusSoc))
+    # publish(STATUS_SOC_TOPIC, statusSoc)
 
 
-def get_battery_status():
+def get_battery_status():###
     res = cmd(b'\xa5\x40\x94\x08\x00\x00\x00\x00\x00\x00\x00\x00\x81')
-    if len(res) < 1:
+    if len(res) < 1:    #####
         print('Empty response get_battery_status')
         return
     buffer = res[0]
@@ -295,19 +270,6 @@ def get_battery_mos_status():
 
 
 
-# while True:
-    # print("loop_start")
-    # get_battery_status() # 0x94
-    # get_battery_state() # 0x90
-    # get_cell_balance(statusCellCount) # 0x95
-    # get_battery_temp() # 0x92
-    # get_battery_mos_status() # 0x93
-    # # time.sleep(1)
-    # print("loop_end")
-    
-# ser.close()
-# print('done')
-
 
 
 if __name__ == "__main__":
@@ -331,8 +293,11 @@ if __name__ == "__main__":
     mqtt_data_handling_process = multiprocessing.Process(target=mqtt_data_handling, args=(mqtt_state_data_queue,))
 
     serial_communication_process = multiprocessing.Process(target=serial_communication, args=(ser, mqtt_data_queue))
-    serial_x90_handling_process = multiprocessing.Process(target=serial_x90_handling, serial_x90_queue, mqtt_state_data_queue)
-    serial_x92_handling_process = multiprocessing.Process(target=serial_x92_handling, serial_x92_queue, mqtt_state_data_queue)
+    serial_x90_handling_process = multiprocessing.Process(target=serial_x90_handling, args=(serial_x90_queue, mqtt_state_data_queue))
+    serial_x92_handling_process = multiprocessing.Process(target=serial_x92_handling, args=(serial_x92_queue, mqtt_state_data_queue))
+
+
+    send_mqtt_discovery_configs()
 
     serial_process.start()
     mqtt_connection_process.start()

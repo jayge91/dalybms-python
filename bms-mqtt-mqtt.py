@@ -41,7 +41,6 @@ def mqtt_data_handling(mqtt_state_data_queue):
 
 
 ## Publish Discovery Topics:
-# Function to publish MQTT Discovery configurations to Home Assistant:
 def publish_mqtt_discovery_config(topic, config):
     # client.publish([topic], [data], [qos], [ratain?])
     client.publish(topic + '/config', config, 0, True)
