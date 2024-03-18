@@ -3,12 +3,33 @@ import time
 import os
 import queue
 
-# Function for managing serial communication
-#
+
+
+## Import Environment Variables:
+# Function to check if environment variables are set:
+def check_environment_variable(var_name):
+    if var_name not in os.environ or not os.environ[var_name]:
+        print(f"Error: Environment variable {var_name} is not set or is empty.")
+        exit(1)
+
+# Check environment variables:
+check_environment_variable('DEVICE')
+check_environment_variable('MQTT_DISCOVERY_PREFIX')
+check_environment_variable('DEVICE_ID')
+
+DEVICE = os.environ['DEVICE'] # /dev/ttyS1
+MQTT_DISCOVERY_PREFIX = os.environ['MQTT_DISCOVERY_PREFIX'] # homeassistant
+DEVICE_ID = os.environ['DEVICE_ID'] # Daly-Smart-BMS
+
+
+
+################################################
+## Function for managing serial communication ##
+################################################
 #
 def serial_communication(ser, serial_x90_queue, serial_x91_queue, serial_x92_queue, serial_x93_queue, serial_x94_queue, serial_x95_queue, serial_x96_queue, serial_x97_queue, serial_x98_queue):
     wait_between_time = 5
-    while True:
+    try:
         # 0x90: SOC, total voltage, current
         x90_command = b'\xa5\x40\x90\x08\x00\x00\x00\x00\x00\x00\x00\x00\x7d'
         print("Command: " + str(x90_command))
@@ -17,7 +38,6 @@ def serial_communication(ser, serial_x90_queue, serial_x91_queue, serial_x92_que
         x90_response = ser.read(13)
         if x90_response:
             serial_x90_queue.put(x90_response)
-            # print("Response: " + str(x90_response))
         else:
             print("No response from device.")
         ser.flushInput()
@@ -38,19 +58,15 @@ def serial_communication(ser, serial_x90_queue, serial_x91_queue, serial_x92_que
         time.sleep(wait_between_time)  # Adjust sleep time as needed
 #        
 #
-        # 0x93: Charge & Discharge MOS Status
+        # 0x93: Charge & Discharge MOS Status, Remaining Ah
 #
 #
-        # 0x94: 
+        # 0x94: Status information 1
         x94_command = b'\xa5\x40\x94\x08\x00\x00\x00\x00\x00\x00\x00\x00\x81'
         print("Command: " + str(x94_command))
         ser.write(x94_command)
         time.sleep(0.1)  # Adjust delay as needed
-        while True:
-            x94_response = ser.read(13)
-            if (x94_response == b''):
-                break
-            res.append(x94_response)
+        x94_response = ser.read(13)
         if x94_response:
             serial_x94_queue.put(x94_response)
         else:
@@ -73,7 +89,7 @@ def serial_communication(ser, serial_x90_queue, serial_x91_queue, serial_x92_que
             serial_x95_queue.put(x95_response)
         else:
             print("No response from device.")
-        ser.flushInput
+        ser.flushInput()
         time.sleep(wait_between_time)  # Adjust sleep time as needed
 #
 #
@@ -145,20 +161,21 @@ def serial_communication(ser, serial_x90_queue, serial_x91_queue, serial_x92_que
         # Byte7: Fault code
 #
 #
+    except Exception as e:
+        print("An error occurred during serial communication:", e)
 
-
-
-# Functions for handling serial data responses
+##################################################
+## Functions for handling serial data responses ##
+##################################################
 #
-def serial_x90_handling(serial_x90_queue, mqtt_state_data_queue):
+def serial_x90_handling(serial_x90_queue, mqtt_state_data_queue):        # 0x90: SOC, total voltage, current
+
 # Set Base Topics for Sensors and Control:
     MQTT_SENSOR_TOPIC = os.environ['MQTT_DISCOVERY_PREFIX'] + '/sensor/' + os.environ['DEVICE_ID'] # "homeassistant/sensor/Daly-Smart-BMS"
-    # 0x90: SOC, total voltage, current
     while True:
         try:
             response = serial_x90_queue.get(timeout=5)
             print("0x90 Response: " + str(response))
-            # if response = b'xa5\x10\x90\x08\x00\x00\x00\x00\x00\x00\x00\x00\x4d' # add case for when bms is sleeping and responds with all zeros
             buffer = response[0]
             
             pack_voltage = int.from_bytes(buffer[4:6], byteorder='big', signed=False) / 10
@@ -189,15 +206,13 @@ def serial_x90_handling(serial_x90_queue, mqtt_state_data_queue):
             pass  # Queue is empty, continue loop
 #
 #
-def serial_x92_handling(serial_x92_queue, mqtt_state_data_queue):
+def serial_x92_handling(serial_x92_queue, mqtt_state_data_queue):        # 0x92: Maximum & Minimum temperature
     MQTT_SENSOR_TOPIC = os.environ['MQTT_DISCOVERY_PREFIX'] + '/sensor/' + os.environ['DEVICE_ID'] # "homeassistant/sensor/Daly-Smart-BMS"
-    # 0x90: SOC, total voltage, current
     while True:
         try:
-            response = serial_x92_queue.get(timeout=5)
-            print("0x90 Response: " + str(response))
-            # if response = b'xa5\x10\x90\x00\x00\x00\x00\x00\x00\x00\x00\x4d' # add case for when bms is sleeping and responds with all zeros
-            buffer = response[0]
+            x92_response = serial_x92_queue.get(timeout=5)
+            print("0x92 Response: " + str(x92_response))
+            buffer = x92_response[0]
             
             maxTemp = int.from_bytes(buffer[4:5], byteorder='big', signed=False) - 40
             maxTempCell = int.from_bytes(buffer[5:6], byteorder='big', signed=False)
@@ -216,15 +231,49 @@ def serial_x92_handling(serial_x92_queue, mqtt_state_data_queue):
             pass
 #
 #
-def serial_x94_handling(serial_x94_queue, mqtt_state_data_queue):
+# def serial_x93_handling(serial_x93_queue, mqtt_state_data_queue):        # 0x93: Charge & Discharge MOS Status, Remaining Ah
+'''
+def get_battery_mos_status():
+    res = cmd(b'\xa5\x40\x93\x08\x00\x00\x00\x00\x00\x00\x00\x00\x80')
+    if len(res) < 1:
+        print('Empty response get_battery_mos_status')
+        return
+    buffer = res[0]
+    valueByte = int.from_bytes(buffer[4:5], byteorder='big', signed=False)
+    
+    statusState = 'Discharging' if valueByte == 2 else ('Charging' if valueByte == 1 else 'Idle')
+    print("statusState: " + str(statusState))
+    publish(STATUS_STATE_TOPIC, statusState)
+    
+    statusChargeMos = int.from_bytes(buffer[5:6], byteorder='big', signed=False)
+    statusChargeMos = 'on' if statusChargeMos == 1 else ('off if statusChargeMos == 0 else 'Unknown')
+    print("statusChargeMos: " + str(statusChargeMos))
+    publish(STATUS_CHARGE_MOS_TOPIC, statusChargeMos)
+    
+    statusDischargeMos = int.from_bytes(buffer[6:7], byteorder='big', signed=False)
+    statusDischargeMos = 'on' if statusDischargeMos == 1 else ('off' if statusDischargeMos == 0 else 'Unknown')
+    print("statusDischargeMos: " + str(statusDischargeMos))
+    publish(STATUS_DISCHARGE_MOS_TOPIC, statusDischargeMos)
+    
+    statusHeartbeat = int.from_bytes(buffer[7:8], byteorder='big', signed=False)
+    print("statusHeartbeat: " + str(statusHeartbeat))
+    publish(STATUS_HEARTBEAT_TOPIC, statusHeartbeat)
+        
+    currentAhRemaining = int.from_bytes(buffer[8:12], byteorder='big', signed=False)/1000
+    print("currentAhRemaining: " + str(currentAhRemaining))
+    publish(CURRENT_AH_REMAINING_TOPIC, currentAhRemaining)
+'''
+#
+#
+def serial_x94_handling(serial_x94_queue, mqtt_state_data_queue):        # 0x94: Status information 1
     MQTT_SENSOR_TOPIC = os.environ['MQTT_DISCOVERY_PREFIX'] + '/sensor/' + os.environ['DEVICE_ID'] # "homeassistant/sensor/Daly-Smart-BMS"
     MQTT_BINARY_SENSOR_TOPIC = os.environ['MQTT_DISCOVERY_PREFIX'] + '/binary_sensor/' + os.environ['DEVICE_ID'] # "homeassistant/binary_sensor/Daly-Smart-BMS"
     # 0x90: SOC, total voltage, current
     while True:
         try:
-            response = serial_x94_queue.get(timeout=5)
-            print("0x94 Response: " + str(response))
-            buffer = response[0]
+            x94_response = serial_x94_queue.get(timeout=5)
+            print("0x94 Response: " + str(x94_response))
+            buffer = x94_response[0]
 
             cells_count = int.from_bytes(buffer[4:5], byteorder='big', signed=False)
             cells_count_topic = MQTT_SENSOR_TOPIC + '_Status_Cell_Count'
@@ -251,7 +300,7 @@ def serial_x94_handling(serial_x94_queue, mqtt_state_data_queue):
             pass
 #
 #
-def serial_x95_handling(serial_x95_queue, mqtt_state_data_queue):
+def serial_x95_handling(serial_x95_queue, mqtt_state_data_queue):        # 0x95: Cell voltage 1~48
     MQTT_SENSOR_TOPIC = os.environ['MQTT_DISCOVERY_PREFIX'] + '/sensor/' + os.environ['DEVICE_ID']
     # 0x95: Cell voltage 1~48
     while True:
@@ -277,20 +326,3 @@ def serial_x95_handling(serial_x95_queue, mqtt_state_data_queue):
             mqtt_state_data_queue.put({topic: value for topic, value in cells})
          except queue.Empty:
             pass
-# For the sake of demonstration, let's assume the cell voltages are:
-# Frame 1: [3.6, 3.7, 3.8]  (Three cell voltages)
-# Frame 2: [3.9, 4.0, 4.1]  (Three cell voltages)
-# Frame 3: [4.2]             (One cell voltage)
-
-# Output dictionary representing the parsed cell voltages:
-# {
-    # 'cell_1_v': 3.6,
-    # 'cell_2_v': 3.7,
-    # 'cell_3_v': 3.8,
-    # 'cell_4_v': 3.9,
-    # 'cell_5_v': 4.0,
-    # 'cell_6_v': 4.1,
-    # 'cell_7_v': 4.2
-# }
-
-

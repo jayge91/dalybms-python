@@ -1,13 +1,35 @@
 # bms-mqtt-discovery.py
+
+import serial
+import time
 import os
+import queue
 import json
 import paho.mqtt.client as mqtt
 
-# Sensor References:
-    # https://developers.home-assistant.io/docs/core/entity/sensor/
-    # https://www.home-assistant.io/integrations/sensor/
-    # https://www.home-assistant.io/integrations/sensor#device-class
-    # https://www.home-assistant.io/integrations/switch/
+## Import Environment Variables:
+# Function to check if environment variables are set:
+def check_environment_variable(var_name):
+    if var_name not in os.environ or not os.environ[var_name]:
+        print(f"Error: Environment variable {var_name} is not set or is empty.")
+        exit(1)
+
+# Check environment variables:
+check_environment_variable('DEVICE')
+check_environment_variable('MQTT_SERVER')
+check_environment_variable('MQTT_USER')
+check_environment_variable('MQTT_PASS')
+check_environment_variable('MQTT_CLIENT_ID')
+check_environment_variable('MQTT_DISCOVERY_PREFIX')
+check_environment_variable('DEVICE_ID')
+
+DEVICE = os.environ['DEVICE'] # /dev/ttyS1
+MQTT_SERVER = os.environ['MQTT_SERVER'] # core-mosquitto
+MQTT_USER = os.environ['MQTT_USER'] # mqtt
+MQTT_PASS = os.environ['MQTT_PASS'] # mqtt
+MQTT_CLIENT_ID = os.environ['MQTT_CLIENT_ID'] # dalybms
+MQTT_DISCOVERY_PREFIX = os.environ['MQTT_DISCOVERY_PREFIX'] # homeassistant
+DEVICE_ID = os.environ['DEVICE_ID'] # Daly-Smart-BMS
 
 
 ## Connect to MQTT:
@@ -26,13 +48,14 @@ def mqtt_connection():
             pass
 
 
+## Handle the publishing of states for sensors:
 def mqtt_data_handling(mqtt_state_data_queue):
     while True:
         try:
             data = mqtt_state_data_queue.get(timeout=5)
             for topic, value in data.items():
                 try:
-                    publish_mqtt_sensor_data(topic, value)
+                    publish_mqtt_sensor_data(topic + '/state', value)
                 except Exception as e:
                     print("Error sending to mqtt: " + str(e))
         except queue.Empty:
@@ -40,16 +63,10 @@ def mqtt_data_handling(mqtt_state_data_queue):
 
 
 
-## Publish Discovery Topics:
+## Publish Discovery Topics:    # client.publish([topic], [data], [qos], [ratain?])
 def publish_mqtt_discovery_config(topic, config):
-    # client.publish([topic], [data], [qos], [ratain?])
     client.publish(topic + '/config', config, 0, True)
     
-# def publish_mqtt_sensor_data(topic, state):
-    # # client.publish([topic], [data], [qos], [ratain?])
-    # client.publish(topic + '/state', state, 0, False)
-
-
 
 # Function to construct JSON output strings for sensors discovery:
 def construct_ha_conf(name, device_class, state_topic, unit_of_measurement, value_template, unique_id, entity_category):
@@ -269,4 +286,3 @@ def send_mqtt_discovery_configs():
     publish_mqtt_discovery_config( TEMPERATURE_BATTERY_TOPIC, json.dumps(temperatureBatteryHaConf))
     publish_mqtt_discovery_config( CONTROL_CHARGE_MOS_TOPIC, json.dumps(controlChargeMosHaConf))
     publish_mqtt_discovery_config( CONTROL_DISCHARGE_MOS_TOPIC, json.dumps(controlDischargeMosHaConf))
-    client.publish(topic + '/config', config, 0, True)
