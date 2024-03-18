@@ -1,6 +1,7 @@
 # bms-mqtt-discovery.py
 import os
 import json
+import paho.mqtt.client as mqtt
 
 # Sensor References:
     # https://developers.home-assistant.io/docs/core/entity/sensor/
@@ -9,15 +10,45 @@ import json
     # https://www.home-assistant.io/integrations/switch/
 
 
+## Connect to MQTT:
+def mqtt_connection():
+    while True:
+        try:
+            print("Connecting to MQTT....")
+            client = mqtt.Client(client_id=os.environ['MQTT_CLIENT_ID'])
+            client.username_pw_set(os.environ['MQTT_USER'], os.environ['MQTT_PASS'])
+            client.connect(os.environ['MQTT_SERVER'])
+            print("MQTT Connected!")
+            client.loop_forever()
+        except Exception as e:
+            print("Error connecting to MQTT:", e)
+            time.sleep(5)
+            pass
+
+
+def mqtt_data_handling(mqtt_state_data_queue):
+    while True:
+        try:
+            data = mqtt_state_data_queue.get(timeout=5)
+            for topic, value in data.items():
+                try:
+                    publish_mqtt_sensor_data(topic, value)
+                except Exception as e:
+                    print("Error sending to mqtt: " + str(e))
+        except queue.Empty:
+            pass # Queue is empty, continue loop
+
+
+
 ## Publish Discovery Topics:
 # Function to publish MQTT Discovery configurations to Home Assistant:
 def publish_mqtt_discovery_config(topic, config):
     # client.publish([topic], [data], [qos], [ratain?])
     client.publish(topic + '/config', config, 0, True)
     
-def publish_mqtt_sensor_data(topic, state):
-    # client.publish([topic], [data], [qos], [ratain?])
-    client.publish(topic + '/state', state, 0, False)
+# def publish_mqtt_sensor_data(topic, state):
+    # # client.publish([topic], [data], [qos], [ratain?])
+    # client.publish(topic + '/state', state, 0, False)
 
 
 
@@ -224,18 +255,19 @@ controlDischargeMosHaConf = construct_ha_conf(
 )
 
 def send_mqtt_discovery_configs():
-    publish_mqtt_discovery_config( STATUS_STATE_TOPIC,           json.dumps(statusStateHaConf))
-    publish_mqtt_discovery_config( STATUS_SOC_TOPIC,             json.dumps(statusSocHaConf))
-    publish_mqtt_discovery_config( STATUS_CHARGE_MOS_TOPIC,      json.dumps(statusChargeMosHaConf))
-    publish_mqtt_discovery_config( STATUS_DISCHARGE_MOS_TOPIC,   json.dumps(statusDischargeMosHaConf))
-    publish_mqtt_discovery_config( STATUS_CELL_COUNT_TOPIC,      json.dumps(statusCellCountHaConf))
-    publish_mqtt_discovery_config( STATUS_HEARTBEAT_TOPIC,       json.dumps(statusHeartbeatHaConf))
-    publish_mqtt_discovery_config( VOLTAGE_PACK_TOPIC,           json.dumps(voltagePackHaConf))
-    publish_mqtt_discovery_config( VOLTAGE_BALANCE_TOPIC,        json.dumps(voltageBalanceHaConf))
-    publish_mqtt_discovery_config( CURRENT_AMPS_TOPIC,           json.dumps(currentAmpsHaConf))
-    publish_mqtt_discovery_config( CURRENT_AH_REMAINING_TOPIC,   json.dumps(currentAhRemainingHaConf))
-    publish_mqtt_discovery_config( POWER_WATTS_TOPIC,            json.dumps(powerWattsHaConf))
-    publish_mqtt_discovery_config( POWER_KWH_REMAINING_TOPIC,    json.dumps(powerKwhRemainingHaConf))
-    publish_mqtt_discovery_config( TEMPERATURE_BATTERY_TOPIC,    json.dumps(temperatureBatteryHaConf))
-    publish_mqtt_discovery_config( CONTROL_CHARGE_MOS_TOPIC,     json.dumps(controlChargeMosHaConf))
-    publish_mqtt_discovery_config( CONTROL_DISCHARGE_MOS_TOPIC,  json.dumps(controlDischargeMosHaConf))
+    publish_mqtt_discovery_config( STATUS_STATE_TOPIC, json.dumps(statusStateHaConf))
+    publish_mqtt_discovery_config( STATUS_SOC_TOPIC, json.dumps(statusSocHaConf))
+    publish_mqtt_discovery_config( STATUS_CHARGE_MOS_TOPIC, json.dumps(statusChargeMosHaConf))
+    publish_mqtt_discovery_config( STATUS_DISCHARGE_MOS_TOPIC, json.dumps(statusDischargeMosHaConf))
+    publish_mqtt_discovery_config( STATUS_CELL_COUNT_TOPIC, json.dumps(statusCellCountHaConf))
+    publish_mqtt_discovery_config( STATUS_HEARTBEAT_TOPIC, json.dumps(statusHeartbeatHaConf))
+    publish_mqtt_discovery_config( VOLTAGE_PACK_TOPIC, json.dumps(voltagePackHaConf))
+    publish_mqtt_discovery_config( VOLTAGE_BALANCE_TOPIC, json.dumps(voltageBalanceHaConf))
+    publish_mqtt_discovery_config( CURRENT_AMPS_TOPIC, json.dumps(currentAmpsHaConf))
+    publish_mqtt_discovery_config( CURRENT_AH_REMAINING_TOPIC, json.dumps(currentAhRemainingHaConf))
+    publish_mqtt_discovery_config( POWER_WATTS_TOPIC, json.dumps(powerWattsHaConf))
+    publish_mqtt_discovery_config( POWER_KWH_REMAINING_TOPIC, json.dumps(powerKwhRemainingHaConf))
+    publish_mqtt_discovery_config( TEMPERATURE_BATTERY_TOPIC, json.dumps(temperatureBatteryHaConf))
+    publish_mqtt_discovery_config( CONTROL_CHARGE_MOS_TOPIC, json.dumps(controlChargeMosHaConf))
+    publish_mqtt_discovery_config( CONTROL_DISCHARGE_MOS_TOPIC, json.dumps(controlDischargeMosHaConf))
+    client.publish(topic + '/config', config, 0, True)

@@ -19,6 +19,10 @@ import time
 import os
 import paho.mqtt.client as mqtt
 
+# Import other parts:
+import bms-mqtt-serial # bms-mqtt-serial.py
+import bms-mqtt-mqtt # bms-mqtt-mqtt.py
+
 
 ## Import Environment Variables:
 print("Importing Environment Variables...")
@@ -57,17 +61,12 @@ CELL_COUNT = int(os.environ['CELL_COUNT']) # later won't be needed
 print("Environment Variables Imported!")
 
 
-## Connect to MQTT:
-print("Connecting to MQTT....")
-client = mqtt.Client(client_id=os.environ['MQTT_CLIENT_ID'])
-client.username_pw_set(os.environ['MQTT_USER'], os.environ['MQTT_PASS'])
-client.connect(os.environ['MQTT_SERVER'])
-print("MQTT Connected!")
+
 
 ## Connect to Serial Port:
-print("Connecting to serial...")
-ser = serial.Serial(os.environ['DEVICE'], 9600, timeout=1)
-print("Serial Connected!")
+# print("Connecting to serial...")
+# ser = serial.Serial(os.environ['DEVICE'], 9600, timeout=1)
+# print("Serial Connected!")
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # Home Assistant Device Discovery:                                          #
@@ -296,15 +295,49 @@ def get_battery_mos_status():
 
 
 
-while True:
-    print("loop_start")
-    get_battery_status() # 0x94
-    get_battery_state() # 0x90
-    get_cell_balance(statusCellCount) # 0x95
-    get_battery_temp() # 0x92
-    get_battery_mos_status() # 0x93
-    # time.sleep(1)
-    print("loop_end")
+# while True:
+    # print("loop_start")
+    # get_battery_status() # 0x94
+    # get_battery_state() # 0x90
+    # get_cell_balance(statusCellCount) # 0x95
+    # get_battery_temp() # 0x92
+    # get_battery_mos_status() # 0x93
+    # # time.sleep(1)
+    # print("loop_end")
     
-ser.close()
-print('done')
+# ser.close()
+# print('done')
+
+
+
+if __name__ == "__main__":
+    print("Connecting to Serial...")
+    ser = serial.Serial(os.environ['DEVICE'], 9600, timeout=1)
+    print("Serial Connected.")
+
+    serial_x90_queue = multiprocessing.Queue()
+    serial_x91_queue = multiprocessing.Queue()
+    serial_x92_queue = multiprocessing.Queue()
+    serial_x93_queue = multiprocessing.Queue()
+    serial_x94_queue = multiprocessing.Queue()
+    serial_x95_queue = multiprocessing.Queue()
+    serial_x96_queue = multiprocessing.Queue()
+    serial_x97_queue = multiprocessing.Queue()
+    serial_x98_queue = multiprocessing.Queue()
+    mqtt_state_data_queue = multiprocessing.Queue()
+
+
+    mqtt_connection_process = multiprocessing.Process(target=mqtt_connection)
+    mqtt_data_handling_process = multiprocessing.Process(target=mqtt_data_handling, args=(mqtt_state_data_queue,))
+
+    serial_communication_process = multiprocessing.Process(target=serial_communication, args=(ser, mqtt_data_queue))
+    serial_x90_handling_process = multiprocessing.Process(target=serial_x90_handling, serial_x90_queue, mqtt_state_data_queue)
+    serial_x92_handling_process = multiprocessing.Process(target=serial_x92_handling, serial_x92_queue, mqtt_state_data_queue)
+
+    serial_process.start()
+    mqtt_connection_process.start()
+    mqtt_data_handling_process.start()
+
+    serial_process.join()
+    mqtt_connection_process.join()
+    mqtt_data_handling_process.join()
