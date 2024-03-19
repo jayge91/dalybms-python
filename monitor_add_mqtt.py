@@ -6,6 +6,14 @@ import os
 import queue
 import json
 import paho.mqtt.client as mqtt
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# Now you can log messages
+logger = logging.getLogger(__name__)
 
 ## Import Environment Variables:
 # Function to check if environment variables are set:
@@ -24,7 +32,7 @@ check_environment_variable('MQTT_DISCOVERY_PREFIX')
 check_environment_variable('DEVICE_ID')
 
 DEVICE = os.environ['DEVICE'] # /dev/ttyS1
-MQTT_SERVER = os.environ['MQTT_SERVER'] # core-mosquitto
+MQTT_SERVER = "core-mosquitto" # os.environ['MQTT_SERVER'] # core-mosquitto
 MQTT_USER = os.environ['MQTT_USER'] # mqtt
 MQTT_PASS = os.environ['MQTT_PASS'] # mqtt
 MQTT_CLIENT_ID = os.environ['MQTT_CLIENT_ID'] # dalybms
@@ -32,45 +40,78 @@ MQTT_DISCOVERY_PREFIX = os.environ['MQTT_DISCOVERY_PREFIX'] # homeassistant
 DEVICE_ID = os.environ['DEVICE_ID'] # Daly-Smart-BMS
 
 
-## Connect to MQTT:
-def mqtt_connection():
+## MQTT:
+def mqtt_connection(mqtt_publish_queue):
+    logger = logging.getLogger(__name__)
+    logger.debug("mqtt_connection process started.")
+    # Attempt Connection:
     while True:
         try:
-            print("Connecting to MQTT....")
+            logger.debug("Connecting to MQTT....")
+            logger.debug(" Server: " + os.environ['MQTT_SERVER'])
             client = mqtt.Client(client_id=os.environ['MQTT_CLIENT_ID'])
             client.username_pw_set(os.environ['MQTT_USER'], os.environ['MQTT_PASS'])
             client.connect(os.environ['MQTT_SERVER'])
-            print("MQTT Connected!")
-            client.loop_forever()
+            logger.debug("MQTT Connected!")
+            # send_mqtt_discovery_configs()
+            client.loop_start()
+            break # Exit the loop if connection succeeds
         except Exception as e:
-            print("Error connecting to MQTT:", e)
-            time.sleep(5)
-            pass
+            logger.debug("Error connecting to MQTT:", e)
+            time.sleep(5) # wait to try again
+
+    # Handle publishing of topics:
+    while True:
+        try:
+            data = mqtt_publish_queue.get(timeout=30) # Pull info from queue
+            logger.debug("MQTT Data in Queue:")
+            try:
+                topic, payload, qos, retain = data
+                client.publish(topic, payload, qos=qos, retain=retain)
+            except Exception as e:
+                logger.debug("Error sending data to MQTT: " + str(e))
+        except queue.Empty:
+            pass # Queue is empty, continue loop.
+
+
 
 
 ## Handle the publishing of states for sensors:
-def mqtt_data_handling(mqtt_state_data_queue):
-    while True:
-        try:
-            data = mqtt_state_data_queue.get(timeout=5)
-            for topic, value in data.items():
-                try:
-                    publish_mqtt_sensor_data(topic + '/state', value)
-                except Exception as e:
-                    print("Error sending to mqtt: " + str(e))
-        except queue.Empty:
-            pass # Queue is empty, continue loop
+# def mqtt_data_handling(mqtt_state_data_queue):
+    # logger = logging.getLogger(__name__)
+    # logger.debug("mqtt_data_handling process started.")
+    # while True:
+        # try:
+            # data = mqtt_state_data_queue.get(timeout=5)
+            # logger.debug("mqtt_data_handling - Received: " + str(data))
+            # for topic, value in data.items():
+                # try:
+                    # logger.debug("Publishing Data...")
+                    # try:
+                        # client.publish(topic + '/state', value, 2, False)
+                    # except Exception as e:
+                        # logger.debug("Error sending state to mqtt: " | str(e))
+                    # logger.debug("Data Published on " + str(topic) + "/state")
+                # except Exception as e:
+                    # logger.debug("Error sending state to mqtt: " + str(e))
+        # except queue.Empty:
+            # pass # Queue is empty, continue loop
 
 
 
 ## Publish Discovery Topics:    # client.publish([topic], [data], [qos], [ratain?])
-def publish_mqtt_discovery_config(topic, config):
-    client.publish(topic + '/config', config, 0, True)
+# def publish_mqtt_discovery_config(topic, config):
+    # logger = logging.getLogger(__name__)
+    # logger.debug("Publishing Discovery: " + str(topic))
+    # try:
+        # client = mqtt.Client(client_id=os.environ['MQTT_CLIENT_ID'])
+        # client.publish(topic + '/config', config, 2, True)
+    # except Exception as e:
+        # logger.debug("Error sending config to mqtt: " + str(e))
     
 
-# Function to construct JSON output strings for sensors discovery:
+## Function to construct JSON output strings for sensors discovery:
 def construct_ha_conf(name, device_class, state_topic, unit_of_measurement, value_template, unique_id, entity_category):
-    print("Constructing ha_conf for " + name + "...")
     ha_conf = {} # trying to initialize dictionary
     if name:
         ha_conf["name"] = name
@@ -92,11 +133,7 @@ def construct_ha_conf(name, device_class, state_topic, unit_of_measurement, valu
         "name": "Daly Smart BMS",
         "identifiers": os.environ['DEVICE_ID']
     }
-    
-    print("done.")
     return ha_conf
-
-
 
 
 ## Configure JSON data for Home Assistant Discovery:
@@ -270,19 +307,21 @@ controlDischargeMosHaConf = construct_ha_conf(
     entity_category =     "configuration"
 )
 
-def send_mqtt_discovery_configs():
-    publish_mqtt_discovery_config( STATUS_STATE_TOPIC, json.dumps(statusStateHaConf))
-    publish_mqtt_discovery_config( STATUS_SOC_TOPIC, json.dumps(statusSocHaConf))
-    publish_mqtt_discovery_config( STATUS_CHARGE_MOS_TOPIC, json.dumps(statusChargeMosHaConf))
-    publish_mqtt_discovery_config( STATUS_DISCHARGE_MOS_TOPIC, json.dumps(statusDischargeMosHaConf))
-    publish_mqtt_discovery_config( STATUS_CELL_COUNT_TOPIC, json.dumps(statusCellCountHaConf))
-    publish_mqtt_discovery_config( STATUS_HEARTBEAT_TOPIC, json.dumps(statusHeartbeatHaConf))
-    publish_mqtt_discovery_config( VOLTAGE_PACK_TOPIC, json.dumps(voltagePackHaConf))
-    publish_mqtt_discovery_config( VOLTAGE_BALANCE_TOPIC, json.dumps(voltageBalanceHaConf))
-    publish_mqtt_discovery_config( CURRENT_AMPS_TOPIC, json.dumps(currentAmpsHaConf))
-    publish_mqtt_discovery_config( CURRENT_AH_REMAINING_TOPIC, json.dumps(currentAhRemainingHaConf))
-    publish_mqtt_discovery_config( POWER_WATTS_TOPIC, json.dumps(powerWattsHaConf))
-    publish_mqtt_discovery_config( POWER_KWH_REMAINING_TOPIC, json.dumps(powerKwhRemainingHaConf))
-    publish_mqtt_discovery_config( TEMPERATURE_BATTERY_TOPIC, json.dumps(temperatureBatteryHaConf))
-    publish_mqtt_discovery_config( CONTROL_CHARGE_MOS_TOPIC, json.dumps(controlChargeMosHaConf))
-    publish_mqtt_discovery_config( CONTROL_DISCHARGE_MOS_TOPIC, json.dumps(controlDischargeMosHaConf))
+def send_mqtt_discovery_configs(mqtt_publish_queue):
+    logger = logging.getLogger(__name__)
+    logger.debug("Publishing MQTT Discovery Data...")
+    mqtt_publish_queue.put((STATUS_STATE_TOPIC + '/config', json.dumps(statusStateHaConf), 2, True))
+    mqtt_publish_queue.put((STATUS_SOC_TOPIC + '/config', json.dumps(statusSocHaConf), 2, True))
+    mqtt_publish_queue.put((STATUS_CHARGE_MOS_TOPIC + '/config', json.dumps(statusChargeMosHaConf), 2, True))
+    mqtt_publish_queue.put((STATUS_DISCHARGE_MOS_TOPIC + '/config', json.dumps(statusDischargeMosHaConf), 2, True))
+    mqtt_publish_queue.put((STATUS_CELL_COUNT_TOPIC + '/config', json.dumps(statusCellCountHaConf), 2, True))
+    mqtt_publish_queue.put((STATUS_HEARTBEAT_TOPIC + '/config', json.dumps(statusHeartbeatHaConf), 2, True))
+    mqtt_publish_queue.put((VOLTAGE_PACK_TOPIC + '/config', json.dumps(voltagePackHaConf), 2, True))
+    mqtt_publish_queue.put((VOLTAGE_BALANCE_TOPIC + '/config', json.dumps(voltageBalanceHaConf), 2, True))
+    mqtt_publish_queue.put((CURRENT_AMPS_TOPIC + '/config', json.dumps(currentAmpsHaConf), 2, True))
+    mqtt_publish_queue.put((CURRENT_AH_REMAINING_TOPIC + '/config', json.dumps(currentAhRemainingHaConf), 2, True))
+    mqtt_publish_queue.put((POWER_WATTS_TOPIC + '/config', json.dumps(powerWattsHaConf), 2, True))
+    mqtt_publish_queue.put((POWER_KWH_REMAINING_TOPIC + '/config', json.dumps(powerKwhRemainingHaConf), 2, True))
+    mqtt_publish_queue.put((TEMPERATURE_BATTERY_TOPIC + '/config', json.dumps(temperatureBatteryHaConf), 2, True))
+    mqtt_publish_queue.put((CONTROL_CHARGE_MOS_TOPIC + '/config', json.dumps(controlChargeMosHaConf), 2, True))
+    mqtt_publish_queue.put((CONTROL_DISCHARGE_MOS_TOPIC + '/config', json.dumps(controlDischargeMosHaConf), 2, True))
